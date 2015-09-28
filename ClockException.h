@@ -3,6 +3,8 @@
 
 #include <stdexcept>
 
+namespace Clock {
+
 class ClockException : public std::exception
 {
 public:
@@ -24,5 +26,5 @@ protected:
     /** Error message */
     std::string msg_;
 };
-
+}
 #endif

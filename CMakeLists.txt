@@ -97,20 +97,20 @@ endif()
  
 set(HDRS
         ./BaseApplication.h
+        ./BufferProvider.h
         ./Clock.h
         ./ClockApplication.h
-        ./ClockApplicationPrivate.h
         ./ClockException.h
-        ./WebsocketAmbassador.h
+        ./IClockApplication.h
         ./WebsocketInterface.h
 )
  
 set(SRCS
         ./BaseApplication.cpp
+        ./BufferProvider.cpp
         ./Clock.cpp
         ./ClockApplication.cpp
-        ./ClockApplicationPrivate.cpp
-        ./WebsocketAmbassador.cpp
+        ./IClockApplication.cpp
         ./WebsocketInterface.cpp
 )
 

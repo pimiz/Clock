@@ -2,11 +2,11 @@
 #define WEBSOCKETINTERFACE_H
 
 #include <libwebsockets.h>
-#include "WebsocketAmbassador.h"
+#include "BufferProvider.h"
 
-//**************************************************************************//
-/* list of supported protocols and callbacks */
-//**************************************************************************//
+// Call the buffer provider WebsocketAmbassador to clarify its purpose on this app
+typedef BufferProvider WebsocketAmbassador;
+
 namespace WebsocketInterface {
 
     int init();
@@ -27,6 +27,10 @@ namespace WebsocketInterface {
 
     //struct libwebsocket_context *context;
 
+
+    //**************************************************************************//
+    /* list of supported protocols and callbacks */
+    //**************************************************************************//
     static struct libwebsocket_protocols protocols[] = {
     /* first protocol must always be HTTP handler */
     {
@@ -38,7 +42,7 @@ namespace WebsocketInterface {
         "my-protocol",
         my_protocol_callback,
         30,
-        WSAMB_RECVBUFFER_SIZE,
+        RECVBUFFER_SIZE,
     },
     { NULL, NULL, 0, 0 }
 

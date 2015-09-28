@@ -10,7 +10,7 @@
 #include <libwebsockets.h>
 #include <string>
 #include "WebsocketInterface.h"
-#include "WebsocketAmbassador.h"
+#include "BufferProvider.h"
 #include "ClockApplication.h"
 
 
@@ -119,8 +119,7 @@ int my_protocol_callback(struct libwebsocket_context *context,
     case LWS_CALLBACK_RECEIVE:
     {
         // message from client received. store it to the ambassador
-        WebsocketAmbassador &amb = WebsocketAmbassador::getInstance();
-        char * ambBuf = amb.getRecvBuffer();
+        char * ambBuf = WebsocketAmbassador::getRecvBuffer();
         memcpy(ambBuf, in, len);
 
         std::cout << "in " << (char*)in << " ambbuf " << *ambBuf << std::endl;
@@ -134,7 +133,7 @@ int my_protocol_callback(struct libwebsocket_context *context,
             if (firstByte == 'x')
             {
                 // respond with current time shown on the clock
-                int currentTime = ClockApplication::getCurrentTime();
+                int currentTime = 242; //ClockApplication::getCurrentTime();
 
                 DEBUG_OUT(currentTime);
                 char timeBuf[sizeof(currentTime)];
