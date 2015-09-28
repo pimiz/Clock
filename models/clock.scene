@@ -1,0 +1,64 @@
+<scene exported_by="juha" formatVersion="1.0.1" previous_export_time="1442683714.4517705" export_time="1442683728.6917565" >
+  <nodes >
+    <node name="MinuteHand" >
+      <position y="0.000000" z="-0.000000" x="0.000000" />
+      <rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
+      <game >
+        <sensors />
+        <actuators />
+      </game>
+      <entity friction_z="1.0" friction_y="1.0" damping_rot="0.10000000149011612" lock_rot_z="False" mass_radius="1.0" name="MinuteHand" mass="1.0" velocity_min="0.0" lock_rot_y="False" damping_trans="0.03999999910593033" inertia_tensor="0.4000000059604645" actor="False" lock_rot_x="False" lock_trans_y="False" anisotropic_friction="False" lock_trans_x="False" physics_type="STATIC" ghost="False" friction_x="1.0" meshFile="MinuteHand.mesh" velocity_max="0.0" lock_trans_z="False" />
+    </node>
+    <node name="Lamp" >
+      <position y="5.903862" z="-1.005454" x="4.076245" />
+      <rotation qy="0.755880" qx="0.169076" qz="-0.272171" qw="0.570947" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
+      <user_data value="100" type="int" name="uid" />
+      <game >
+        <sensors />
+        <actuators />
+      </game>
+      <light powerScale="1.0" shadow="true" type="point" name="Lamp" >
+        <position y="5.903862" z="-1.005454" x="4.076245" />
+        <lightAttenuation quadratic="0.0" linear="0.03333335240683057" range="5000" constant="1.0" />
+        <colourDiffuse g="1.0" r="1.0" b="1.0" />
+        <colourSpecular g="1.0" r="1.0" b="1.0" />
+        <colourShadow g="1.0" r="1.0" b="1.0" />
+      </light>
+    </node>
+    <node name="Camera" >
+      <position y="5.343665" z="6.507640" x="7.481132" />
+      <rotation qy="0.334251" qx="0.481707" qz="-0.212922" qw="0.781600" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
+      <game >
+        <sensors />
+        <actuators />
+      </game>
+      <camera fov="0.5033799435163735" projectionType="perspective" name="Camera" >
+        <clipping nearPlaneDist="0.10000000149011612" near="0.10000000149011612" farPlaneDist="100.0" far="100.0" />
+      </camera>
+    </node>
+    <node name="HourHand" >
+      <position y="0.000000" z="-0.000000" x="0.000000" />
+      <rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
+      <user_data value="101" type="int" name="uid" />
+      <game >
+        <sensors />
+        <actuators />
+      </game>
+      <entity friction_z="1.0" friction_y="1.0" damping_rot="0.10000000149011612" lock_rot_z="False" mass_radius="1.0" name="HourHand" mass="1.0" velocity_min="0.0" lock_rot_y="False" damping_trans="0.03999999910593033" inertia_tensor="0.4000000059604645" actor="False" lock_rot_x="False" lock_trans_y="False" anisotropic_friction="False" lock_trans_x="False" physics_type="STATIC" ghost="False" friction_x="1.0" meshFile="HourHand.mesh" velocity_max="0.0" lock_trans_z="False" />
+    </node>
+  </nodes>
+  <externals >
+    <item type="material" >
+      <file name="/home/juha/koodit/Clock/Clock/models/Material.003.material" />
+    </item>
+  </externals>
+  <environment >
+    <colourAmbient g="0.0" r="0.0" b="0.0" />
+    <colourBackground g="0.05087608844041824" r="0.05087608844041824" b="0.05087608844041824" />
+    <colourDiffuse g="0.05087608844041824" r="0.05087608844041824" b="0.05087608844041824" />
+  </environment>
+</scene>
