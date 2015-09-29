@@ -119,10 +119,10 @@ int my_protocol_callback(struct libwebsocket_context *context,
     case LWS_CALLBACK_RECEIVE:
     {
         // message from client received. store it to the ambassador
-        char * ambBuf = WebsocketAmbassador::getRecvBuffer();
-        memcpy(ambBuf, in, len);
+        //char * ambBuf = WebsocketAmbassador::getRecvBuffer();
+        //memcpy(ambBuf, in, len);
 
-        std::cout << "in " << (char*)in << " ambbuf " << *ambBuf << std::endl;
+        //std::cout << "in " << (char*)in << " ambbuf " << *ambBuf << std::endl;
 
         // check if an instant response is required
         if (len > 0)

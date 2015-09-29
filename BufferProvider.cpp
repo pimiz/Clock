@@ -1,25 +1,25 @@
-#include <cstring>
 #include "BufferProvider.h"
 
-char* BufferProvider::getRecvBuffer()
+recvBuffer& BufferProvider::getRecvBuffer()
 {
-    static char buffer[RECVBUFFER_SIZE];
+    static std::array<int, RECVBUFFER_SIZE> buffer;
     return buffer;
 }
 
-char* BufferProvider::getSendBuffer()
+sendBuffer& BufferProvider::getSendBuffer()
 {
-    static char buffer[SENDBUFFER_SIZE];
+    static std::array<int, SENDBUFFER_SIZE> buffer;
     return buffer;
 }
 
-void BufferProvider::clearBuffer()
+
+void BufferProvider::clearRecvBuffer()
 {
-    char * buffer = getRecvBuffer();
-    memset(&buffer[0], 0, RECVBUFFER_SIZE);
+    std::array<int, RECVBUFFER_SIZE> buffer = BufferProvider::getRecvBuffer();
+    buffer.fill(0);
 }
 
 int BufferProvider::getRecvBufferSize()
 {
-    return strlen(getRecvBuffer());
+    return BufferProvider::getRecvBuffer().size();
 }

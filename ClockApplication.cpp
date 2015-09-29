@@ -3,12 +3,11 @@
 #include <OgreWindowEventUtilities.h>
 #include "ClockApplication.h"
 #include "WebsocketInterface.h"
-#include "BufferProvider.h"
 #include "ClockException.h"
+#include "UserRequests.h"
 
 namespace Clock {
 
-enum class UserRequestActions {SET_TIME, CHANGE_COLOR};
 
 ClockApplication::ClockApplication() :
     currentHours(0),
@@ -69,14 +68,14 @@ void ClockApplication::go()
       {
         try
         {
-            processUserRequest(WebsocketAmbassador::getRecvBuffer());
+            processUserRequest(parseUserRequest(WebsocketAmbassador::getRecvBuffer()));
         }
         catch (ClockException &e)
         {
             CONSOLE_OUTPUT_ERROR(e.what());
         }
 
-        WebsocketAmbassador::clearBuffer();
+        WebsocketAmbassador::clearRecvBuffer();
       }
 
       CONSOLE_OUTPUT(mCamera->getDirection());
@@ -106,26 +105,24 @@ void ClockApplication::createScene()
 
 }
 
-void ClockApplication::processUserRequest(char * buffer)
+void ClockApplication::processUserRequest(IUserRequest * p_request)
 {
     // 1st byte: command
 
-    char command;
-    memcpy(&command, buffer, 1);
-
-    switch (atoi(&command))
+    switch (p_request->getCommand())
     {
-        case 1: // adjust time
-        {
-            parseAndApplyNewTime(buffer);
-            break;
-        }
-        case 2:
-        {
-
-        }
-        default:
-            break;
+    case UserRequestCommand::SET_TIME: // adjust time
+    {
+        const UserRequestSetTime * setTime = dynamic_cast<const UserRequestSetTime *>(p_request);
+        adjustClock(setTime->getHours(), setTime->getMinutes());
+        break;
+    }
+    case UserRequestCommand::CHANGE_COLOR:
+    {
+        // TODO implement
+    }
+    default:
+        break;
     }
 }
 
@@ -175,6 +172,7 @@ void ClockApplication::setMinuteHand(const int & timeDifference) const
 }
 
 // Convert time to minutes past midnight
+// TODO remove this from here
 int ClockApplication::convertTimeToMinutes(int hour, int min) const
 {
     if (hour == 12)
@@ -185,26 +183,48 @@ int ClockApplication::convertTimeToMinutes(int hour, int min) const
 
 // Return the absolute time difference from current to target time in minutes
 // (how much forward the clock has to be turned)
+// TODO transfer to UserRequestSetTime class
 int ClockApplication::computeTime(int hour1, int hour2, int min1, int min2) const
 {
     return convertTimeToMinutes(hour1, min1) -
         convertTimeToMinutes(hour2, min2);
 }
 
-// parse user input from websocket and adjust clock accordingly
-void ClockApplication::parseAndApplyNewTime(const char * buffer)
-{
-    char hours[2];
-    char minutes[2];
-    memcpy(&hours, buffer+1, 2); // bytes 2-3: hours
-    memcpy(&minutes, buffer+3, 2); // bytes 4-5: minutes
-    adjustClock(atoi(hours), atoi(minutes));
-}
 
 // return current time (past midnight)
 int ClockApplication::getCurrentTime()
 {
     return convertTimeToMinutes(currentHours, currentMinutes);
+}
+
+IUserRequest * ClockApplication::parseUserRequest(recvBuffer &buffer)
+{
+    // 1st byte: command
+    char command;
+    memcpy(&command, &buffer[1], 1);
+
+    switch (static_cast<UserRequestCommand>(atoi(&command)))
+    {
+    case UserRequestCommand::SET_TIME: // set time
+    {
+        UserRequestSetTime * setTime = new UserRequestSetTime();
+        char hours[2];
+        char minutes[2];
+        memcpy(&hours, &buffer+1, 2); // bytes 2-3: hours
+        memcpy(&minutes, &buffer+3, 2); // bytes 4-5: minutes
+        setTime->setHours(atoi(hours));
+        setTime->setMinutes(atoi(minutes));
+        return setTime;
+        break;
+    }
+    case UserRequestCommand::CHANGE_COLOR: // change color of clock
+    {
+        // TODO implement
+    }
+    default:
+        throw ClockException("Unknown command");
+        break;
+    }
 }
 
 }

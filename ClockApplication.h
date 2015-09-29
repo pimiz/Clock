@@ -1,7 +1,9 @@
 #ifndef CLOCKAPPLICATION_H
 #define CLOCKAPPLICATION_H
 
+#include "BufferProvider.h"
 #include "IClockApplication.h"
+#include "IUserRequest.h"
 
 namespace Clock {
 
@@ -16,7 +18,9 @@ public:
     /*static*/ int getCurrentTime() override;
 
 protected:
-    void processUserRequest(char * buffer);
+
+    void processUserRequest(IUserRequest * p_request);
+    IUserRequest * parseUserRequest(recvBuffer &buffer);
 
     void adjustClock(const int hours, const int minutes);
     void setHourHand(const int & timeDifference) const;
@@ -29,8 +33,6 @@ protected:
     // (how much forward the clock has to be turned)
     int computeTime(int hour1, int hour2, int min1, int min2) const;
 
-    // parse user input from websocket and adjust clock accordingly
-    void parseAndApplyNewTime(const char * buffer);
 
 private:
     // Disable copy ctor
