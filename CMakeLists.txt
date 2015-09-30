@@ -98,7 +98,6 @@ endif()
 set(HDRS
         ./BaseApplication.h
         ./BufferProvider.h
-        ./Clock.h
         ./ClockApplication.h
         ./ClockException.h
         ./IClockApplication.h
