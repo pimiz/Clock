@@ -4,17 +4,19 @@
 namespace Clock
 {
 
-enum class UserRequestCommand {SET_TIME, CHANGE_COLOR};
+enum class UserRequestCommand {SET_TIME = 1, CHANGE_COLOR = 2};
 
 class IUserRequest
 {
 public:
     IUserRequest(UserRequestCommand p_command) : command_(p_command) {};
+
     virtual ~IUserRequest() {};
     UserRequestCommand getCommand()
     {
         return command_;
     }
+
 
 protected:
     UserRequestCommand command_;

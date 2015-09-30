@@ -11,8 +11,7 @@
 #include <string>
 #include "WebsocketInterface.h"
 #include "BufferProvider.h"
-#include "ClockApplication.h"
-
+#include "ClockException.h"
 
 #include <iostream> //debug
 #define DEBUG_OUT(X) std::cout << X << std::endl
@@ -118,38 +117,52 @@ int my_protocol_callback(struct libwebsocket_context *context,
 
     case LWS_CALLBACK_RECEIVE:
     {
-        // message from client received. store it to the ambassador
-        //char * ambBuf = WebsocketAmbassador::getRecvBuffer();
-        //memcpy(ambBuf, in, len);
+        // message from client received
+
+        /* check if length of received data is in allowed limits.
+           one byte is reserved for length information */
+        if (len >= RECVBUFFER_SIZE)
+        {
+            throw Clock::ClockException("Too large data callback from Websocket interface");
+        }
+
+        WebsocketAmbassador::getMutex().lock();
+
+        recvBuffer& recvBuf = WebsocketAmbassador::getRecvBuffer();
+
+        // store length of received data to first element of buffer
+        recvBuf[0] = std::to_string(len)[0];
+
+        memcpy(&recvBuf[1], in, len);
 
         //std::cout << "in " << (char*)in << " ambbuf " << *ambBuf << std::endl;
 
         // check if an instant response is required
-        if (len > 0)
+
+        char firstByte;
+        memcpy(&firstByte, in, 1);
+
+        if (firstByte == 'x')
         {
-            char firstByte;
-            memcpy(&firstByte, in, 1);
+            // respond with current time shown on the clock
+            int currentTime = 242; //ClockApplication::getCurrentTime();
 
-            if (firstByte == 'x')
-            {
-                // respond with current time shown on the clock
-                int currentTime = 242; //ClockApplication::getCurrentTime();
+            DEBUG_OUT(currentTime);
+            char timeBuf[sizeof(currentTime)];
+            DEBUG_OUT(sizeof(currentTime));
 
-                DEBUG_OUT(currentTime);
-                char timeBuf[sizeof(currentTime)];
-                DEBUG_OUT(sizeof(currentTime));
+            //memcpy(&timeBuf, &currentTime, sizeof(currentTime));
+            std::string s = std::to_string(currentTime);
 
-                //memcpy(&timeBuf, &currentTime, sizeof(currentTime));
-                std::string s = std::to_string(currentTime);
+            DEBUG_OUT(s);
 
-                DEBUG_OUT(s);
-
-                for (int i=0; i < sizeof(currentTime); i++) {
-                    buf[LWS_SEND_BUFFER_PRE_PADDING + i ] = s[i];
-                }
-                libwebsocket_write(wsi, &buf[LWS_SEND_BUFFER_PRE_PADDING], sizeof(currentTime), LWS_WRITE_TEXT);
+            for (int i=0; i < sizeof(currentTime); i++) {
+                buf[LWS_SEND_BUFFER_PRE_PADDING + i ] = s[i];
             }
+            libwebsocket_write(wsi, &buf[LWS_SEND_BUFFER_PRE_PADDING], sizeof(currentTime), LWS_WRITE_TEXT);
         }
+
+        WebsocketAmbassador::getMutex().unlock();
 
     }
     case LWS_CALLBACK_FILTER_PROTOCOL_CONNECTION:

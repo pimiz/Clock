@@ -51,6 +51,7 @@ void ClockApplication::go()
     adjustClock(now->tm_hour, now->tm_min);
 
 
+    WebsocketAmbassador::clearRecvBuffer();
 
     // main event loop
     while(true)
@@ -64,11 +65,15 @@ void ClockApplication::go()
       // check for websocket messages
       WebsocketInterface::runService();
 
-      if (BufferProvider::getRecvBufferSize() > 0)
+      WebsocketAmbassador::getMutex().lock();
+      if (WebsocketAmbassador::getReceivedBytes() > 0)
       {
+          CONSOLE_OUTPUT(WebsocketAmbassador::getReceivedBytes());
         try
         {
-            processUserRequest(parseUserRequest(WebsocketAmbassador::getRecvBuffer()));
+            IUserRequest * request = parseUserRequest(WebsocketAmbassador::getRecvBuffer());
+            processUserRequest(request);
+            delete request;
         }
         catch (ClockException &e)
         {
@@ -77,8 +82,7 @@ void ClockApplication::go()
 
         WebsocketAmbassador::clearRecvBuffer();
       }
-
-      CONSOLE_OUTPUT(mCamera->getDirection());
+      WebsocketAmbassador::getMutex().unlock();
     }
 
     // Clean up
@@ -199,19 +203,23 @@ int ClockApplication::getCurrentTime()
 
 IUserRequest * ClockApplication::parseUserRequest(recvBuffer &buffer)
 {
-    // 1st byte: command
+    // 2nd byte: command
     char command;
     memcpy(&command, &buffer[1], 1);
 
-    switch (static_cast<UserRequestCommand>(atoi(&command)))
+    UserRequestCommand urq = static_cast<UserRequestCommand>(atoi(&command));
+
+
+    switch (urq)
     {
     case UserRequestCommand::SET_TIME: // set time
     {
         UserRequestSetTime * setTime = new UserRequestSetTime();
+
         char hours[2];
         char minutes[2];
-        memcpy(&hours, &buffer+1, 2); // bytes 2-3: hours
-        memcpy(&minutes, &buffer+3, 2); // bytes 4-5: minutes
+        memcpy(&hours, &buffer[2], 2); // bytes 3-4: hours
+        memcpy(&minutes, &buffer[4], 2); // bytes 5-6: minutes
         setTime->setHours(atoi(hours));
         setTime->setMinutes(atoi(minutes));
         return setTime;
@@ -222,9 +230,12 @@ IUserRequest * ClockApplication::parseUserRequest(recvBuffer &buffer)
         // TODO implement
     }
     default:
-        throw ClockException("Unknown command");
+        throw ClockException("Unknown user request command");
         break;
     }
+
+    return nullptr;
+
 }
 
 }

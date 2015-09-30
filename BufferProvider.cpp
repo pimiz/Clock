@@ -2,24 +2,42 @@
 
 recvBuffer& BufferProvider::getRecvBuffer()
 {
-    static std::array<int, RECVBUFFER_SIZE> buffer;
+    static recvBuffer buffer;
     return buffer;
 }
 
 sendBuffer& BufferProvider::getSendBuffer()
 {
-    static std::array<int, SENDBUFFER_SIZE> buffer;
+    static sendBuffer buffer;
     return buffer;
 }
 
-
 void BufferProvider::clearRecvBuffer()
 {
-    std::array<int, RECVBUFFER_SIZE> buffer = BufferProvider::getRecvBuffer();
-    buffer.fill(0);
+    recvBuffer &buffer = BufferProvider::getRecvBuffer();
+    buffer.fill('0');
 }
 
-int BufferProvider::getRecvBufferSize()
+void BufferProvider::clearSendBuffer()
 {
-    return BufferProvider::getRecvBuffer().size();
+    sendBuffer &buffer = BufferProvider::getSendBuffer();
+    buffer.fill('0');
+}
+
+int BufferProvider::getReceivedBytes()
+{
+    char size = BufferProvider::getRecvBuffer().front();
+    return atoi(&size);
+}
+
+int BufferProvider::getSentBytes()
+{
+    char size = BufferProvider::getSendBuffer().front();
+    return atoi(&size);
+}
+
+std::mutex& BufferProvider::getMutex()
+{
+    static std::mutex mutex;
+    return mutex;
 }
