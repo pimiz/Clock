@@ -1,11 +1,29 @@
+#include <cstring>
 #include "UserRequests.h"
 #include "ClockException.h"
+
 
 namespace Clock
 {
 UserRequestSetTime::UserRequestSetTime() : IUserRequest(UserRequestCommand::SET_TIME),
     hours_(0), minutes_(0)
 {
+}
+
+
+UserRequestSetTime::UserRequestSetTime(std::array<char, 64> const &buffer) : IUserRequest(UserRequestCommand::SET_TIME)
+{
+  this->construct(buffer);
+}
+
+void UserRequestSetTime::construct(std::array<char, 64> const &buffer)
+{
+    char hours[2];
+    char minutes[2];
+    memcpy(&hours, &buffer[2], 2); // bytes 3-4: hours
+    memcpy(&minutes, &buffer[4], 2); // bytes 5-6: minutes
+    hours_ = atoi(hours);
+    minutes_ = atoi(minutes);
 }
 
 UserRequestSetTime::~UserRequestSetTime()

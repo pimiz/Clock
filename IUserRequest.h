@@ -1,6 +1,18 @@
 #ifndef IUSERREQUEST_H
 #define IUSERREQUEST_H
 
+#include <array>
+#include <memory>
+
+namespace Clock
+{
+    class IUserRequest;
+}
+
+typedef std::shared_ptr<Clock::IUserRequest> userRequest;
+
+// TODO rename this class because it is an abstract base class, not an interface
+
 namespace Clock
 {
 
@@ -19,10 +31,11 @@ public:
 
 
 protected:
+    virtual void construct(std::array<char, 64> const &buffer) {};
     UserRequestCommand command_;
 };
 
-IUserRequest * createUserRequestObject(UserRequestCommand p_command);
+userRequest createUserRequestObject(UserRequestCommand const p_command, std::array<char, 64> const &p_buffer);
 
 }
 

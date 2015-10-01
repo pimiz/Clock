@@ -133,9 +133,8 @@ int my_protocol_callback(struct libwebsocket_context *context,
         // store length of received data to first element of buffer
         recvBuf[0] = std::to_string(len)[0];
 
+        // copy received data to buffer
         memcpy(&recvBuf[1], in, len);
-
-        //std::cout << "in " << (char*)in << " ambbuf " << *ambBuf << std::endl;
 
         // check if an instant response is required
 
@@ -151,7 +150,6 @@ int my_protocol_callback(struct libwebsocket_context *context,
             char timeBuf[sizeof(currentTime)];
             DEBUG_OUT(sizeof(currentTime));
 
-            //memcpy(&timeBuf, &currentTime, sizeof(currentTime));
             std::string s = std::to_string(currentTime);
 
             DEBUG_OUT(s);

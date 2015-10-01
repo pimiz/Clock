@@ -1,9 +1,11 @@
 #ifndef CLOCKAPPLICATION_H
 #define CLOCKAPPLICATION_H
 
+#include <memory>
 #include "BufferProvider.h"
 #include "IClockApplication.h"
 #include "IUserRequest.h"
+
 
 namespace Clock {
 
@@ -19,8 +21,8 @@ public:
 
 protected:
 
-    void processUserRequest(IUserRequest * p_request);
-    IUserRequest * parseUserRequest(recvBuffer &buffer);
+    void processUserRequest(userRequest const &p_request);
+    userRequest parseUserRequest(recvBuffer &buffer);
 
     void adjustClock(const int hours, const int minutes);
     void setHourHand(const int & timeDifference) const;

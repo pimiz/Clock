@@ -71,9 +71,9 @@ void ClockApplication::go()
           CONSOLE_OUTPUT(WebsocketAmbassador::getReceivedBytes());
         try
         {
-            IUserRequest * request = parseUserRequest(WebsocketAmbassador::getRecvBuffer());
+            //IUserRequest * request = parseUserRequest(WebsocketAmbassador::getRecvBuffer());
+            userRequest request = parseUserRequest(WebsocketAmbassador::getRecvBuffer());
             processUserRequest(request);
-            delete request;
         }
         catch (ClockException &e)
         {
@@ -109,15 +109,13 @@ void ClockApplication::createScene()
 
 }
 
-void ClockApplication::processUserRequest(IUserRequest * p_request)
+void ClockApplication::processUserRequest(userRequest const &p_request)
 {
-    // 1st byte: command
-
     switch (p_request->getCommand())
     {
     case UserRequestCommand::SET_TIME: // adjust time
     {
-        const UserRequestSetTime * setTime = dynamic_cast<const UserRequestSetTime *>(p_request);
+        std::shared_ptr<UserRequestSetTime> setTime = std::dynamic_pointer_cast<UserRequestSetTime>(p_request);
         adjustClock(setTime->getHours(), setTime->getMinutes());
         break;
     }
@@ -201,41 +199,15 @@ int ClockApplication::getCurrentTime()
     return convertTimeToMinutes(currentHours, currentMinutes);
 }
 
-IUserRequest * ClockApplication::parseUserRequest(recvBuffer &buffer)
+userRequest ClockApplication::parseUserRequest(recvBuffer &buffer)
 {
     // 2nd byte: command
     char command;
     memcpy(&command, &buffer[1], 1);
 
-    UserRequestCommand urq = static_cast<UserRequestCommand>(atoi(&command));
+    UserRequestCommand userReqCom = static_cast<UserRequestCommand>(atoi(&command));
 
-
-    switch (urq)
-    {
-    case UserRequestCommand::SET_TIME: // set time
-    {
-        UserRequestSetTime * setTime = new UserRequestSetTime();
-
-        char hours[2];
-        char minutes[2];
-        memcpy(&hours, &buffer[2], 2); // bytes 3-4: hours
-        memcpy(&minutes, &buffer[4], 2); // bytes 5-6: minutes
-        setTime->setHours(atoi(hours));
-        setTime->setMinutes(atoi(minutes));
-        return setTime;
-        break;
-    }
-    case UserRequestCommand::CHANGE_COLOR: // change color of clock
-    {
-        // TODO implement
-    }
-    default:
-        throw ClockException("Unknown user request command");
-        break;
-    }
-
-    return nullptr;
-
+    return createUserRequestObject(userReqCom, buffer);
 }
 
 }
