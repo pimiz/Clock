@@ -1,13 +1,10 @@
 #ifndef BUFFERPROVIDER_H
 #define BUFFERPROVIDER_H
 #include <array>
+#include <memory>
 #include <mutex>
-
-#define RECVBUFFER_SIZE 64
-#define SENDBUFFER_SIZE 64
-
-typedef std::array<char, RECVBUFFER_SIZE> recvBuffer;
-typedef std::array<char, SENDBUFFER_SIZE> sendBuffer;
+#include "CommonDefines.h"
+#include "ITimeRequester.h"
 
 class BufferProvider
 {
@@ -18,18 +15,18 @@ class BufferProvider
         static void clearSendBuffer();
         static int getReceivedBytes();
         static int getSentBytes();
+        static void setTimeRequester(std::unique_ptr<TimeRequester::ITimeRequester> requester);
 
         /* Use a mutex to make the buffers thread-safe */
         static std::mutex& getMutex();
 
     private:
+        /* Disable default ctor */
         BufferProvider() {};
-
-        // Disable copy ctor
-        BufferProvider(BufferProvider const&);
-        // Disable assignment operator
-        void operator=(BufferProvider const&);
-
+        /* Disable copy ctor */
+        BufferProvider(BufferProvider const &);
+        /* Disable assignment operator */
+        void operator=(BufferProvider const &);
 };
 
 #endif

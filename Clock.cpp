@@ -1,16 +1,17 @@
 #include <iostream>
+#include <memory>
 #include "IClockApplication.h"
-#include "WebsocketInterface.h"
 #include "ClockException.h"
+#include "CommonDefines.h"
+
+using namespace ClockPublic;
 
 extern "C" {
 
 int main(int argc, char *argv[])
     {
-        WebsocketInterface::init();
-
-        // Create application object
-        IClockApplication::IClockApplication * app = IClockApplication::createObject();
+        /* Create application object */
+        std::unique_ptr<IClockApplication> app = createClockAppObject();
 
         try
         {
@@ -18,17 +19,15 @@ int main(int argc, char *argv[])
         }
         catch(Ogre::Exception& e)
         {
-            std::cerr << "An OGRE exception has occured: " <<
-                e.getFullDescription() << std::endl;
+            CONSOLE_OUTPUT_ERROR(std::string("An OGRE exception has occured: ")
+                                 + e.getFullDescription())
         }
         catch (Clock::ClockException &e)
         {
-            std::cerr << "A clock exception has occured: " <<
-                e.what() << std::endl;
+            CONSOLE_OUTPUT_ERROR(std::string("A clock exception has occured: ")
+                                 +e.what())
         }
 
-
-        WebsocketInterface::finish();
         return 0;
     }
 }

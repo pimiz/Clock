@@ -100,8 +100,9 @@ set(HDRS
         ./BufferProvider.h
         ./ClockApplication.h
         ./ClockException.h
+        ./CommonDefines.h
         ./IClockApplication.h
-        ./IUserRequest.h
+        ./UserRequest.h
         ./UserRequests.h
         ./WebsocketInterface.h
 )
@@ -112,7 +113,7 @@ set(SRCS
         ./Clock.cpp
         ./ClockApplication.cpp
         ./IClockApplication.cpp
-        ./IUserRequest.cpp
+        ./UserRequest.cpp
         ./UserRequests.cpp
         ./WebsocketInterface.cpp
 )

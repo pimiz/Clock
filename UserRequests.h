@@ -1,44 +1,41 @@
 #ifndef USERREQUESTS_H
 #define USERREQUESTS_H
 
-#include "IUserRequest.h"
+#include "UserRequest.h"
 
 namespace Clock
 {
 
-class UserRequestSetTime : public IUserRequest
+class UserRequestSetTime : public UserRequest
 {
 public:
-    UserRequestSetTime();
-    UserRequestSetTime(std::array<char, 64> const &buffer);
+    UserRequestSetTime(recvBuffer const & p_buffer);
 
     ~UserRequestSetTime();
-
-    void setHours(const int p_hours);
-    void setMinutes(const int p_minutes);
 
     int getHours() const;
 
     int getMinutes() const;
 
-    /* Get time in minutes past 00:00 (or possibly 12:00, if time given originally in 24h format) */
-    int getTimeInMinutesPastZero() const;
+    int getTimeInMinutesPastMidnight() const;
 
 protected:
-    void construct(std::array<char, 64> const &buffer) override;
+    void construct(recvBuffer const & p_buffer) override;
 
 private:
+    /* disable default constructor */
+    UserRequestSetTime() = delete;
     UserRequestSetTime(const UserRequestSetTime&) = delete;
     UserRequestSetTime operator=(const UserRequestSetTime &) = delete;
+    void setHours(int const p_hours);
+    void setMinutes(int const p_minutes);
+    int getTimeInMinutesPastMidnight(int const p_hours, int const p_minutes) const;
 
-
-
-    int getTimeInMinutesPastZero(const int p_hours, const int p_minutes) const;
-
-    int hours_;
-    int minutes_;
+    int m_hours;
+    int m_minutes;
 };
 
 }
 
 #endif
+

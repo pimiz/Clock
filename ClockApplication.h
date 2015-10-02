@@ -4,36 +4,38 @@
 #include <memory>
 #include "BufferProvider.h"
 #include "IClockApplication.h"
-#include "IUserRequest.h"
+#include "ITimeRequester.h"
+#include "UserRequest.h"
 
 
 namespace Clock {
 
-class ClockApplication : public IClockApplication::IClockApplication
+class ClockApplication : public ClockPublic::IClockApplication, public TimeRequester::ITimeRequester
 {
 public:
     ClockApplication();
     ~ClockApplication();
+
+    /* Functions inherited from IClockApplication */
     void go() override;
     void createScene() override;
 
-    /*static*/ int getCurrentTime() override;
+    /* Function inherited from ITimeRequester */
+    int getCurrentTime() override;
 
 protected:
 
-    void processUserRequest(userRequest const &p_request);
-    userRequest parseUserRequest(recvBuffer &buffer);
+    void processUserRequest(userRequest const & p_request);
+    userRequest parseUserRequest(recvBuffer const & p_buffer);
 
-    void adjustClock(const int hours, const int minutes);
-    void setHourHand(const int & timeDifference) const;
-    void setMinuteHand(const int & timeDifference) const;
+    void adjustClock(int const p_hours, int const p_minutes);
+    void setHourHand(int const & p_timeDifference) const;
+    void setMinuteHand(int const & p_timeDifference) const;
 
-    // Convert time to minutes past midnight
-    int convertTimeToMinutes(int hour, int min) const;
-
+    int convertTimeToMinutes(int const p_hour, int const p_min) const;
     // Return the absolute time difference from current to target time in minutes
     // (how much forward the clock has to be turned)
-    int computeTime(int hour1, int hour2, int min1, int min2) const;
+    int computeTimeDifference(int const p_hour1, int const p_hour2, int const p_min1, int const p_min2) const;
 
 
 private:
@@ -79,8 +81,8 @@ private:
     Ogre::SceneNode* hourHandNode;
     Ogre::SceneNode* minuteHandNode;
     Ogre::SceneNode* clockFaceNode;
-    int currentHours;
-    int currentMinutes;
+    int m_currentHours;
+    int m_currentMinutes;
 };
 
 }

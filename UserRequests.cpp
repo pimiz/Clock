@@ -5,15 +5,10 @@
 
 namespace Clock
 {
-UserRequestSetTime::UserRequestSetTime() : IUserRequest(UserRequestCommand::SET_TIME),
-    hours_(0), minutes_(0)
-{
-}
 
-
-UserRequestSetTime::UserRequestSetTime(std::array<char, 64> const &buffer) : IUserRequest(UserRequestCommand::SET_TIME)
+UserRequestSetTime::UserRequestSetTime(std::array<char, 64> const &buffer) : UserRequest(UserRequestCommand::SET_TIME)
 {
-  this->construct(buffer);
+    this->construct(buffer);
 }
 
 void UserRequestSetTime::construct(std::array<char, 64> const &buffer)
@@ -22,62 +17,55 @@ void UserRequestSetTime::construct(std::array<char, 64> const &buffer)
     char minutes[2];
     memcpy(&hours, &buffer[2], 2); // bytes 3-4: hours
     memcpy(&minutes, &buffer[4], 2); // bytes 5-6: minutes
-    hours_ = atoi(hours);
-    minutes_ = atoi(minutes);
+    m_hours = atoi(hours);
+    m_minutes = atoi(minutes);
 }
 
 UserRequestSetTime::~UserRequestSetTime()
 {
 }
 
-void UserRequestSetTime::setHours(const int p_hours)
+void UserRequestSetTime::setHours(int const p_hours)
 {
     if (p_hours < 0 || p_hours > 23)
     {
-        throw ClockException("Hours out of accepted range");
+        throw ClockException(std::string("Hours out of accepted range: ") + std::to_string(p_hours));
     }
 
-    /* We use 12h time format inside this application */
-    if (p_hours >= 12)
-    {
-        hours_ = p_hours - 12;
-    }
-    else
-    {
-        hours_ = p_hours;
-    }
+    m_hours = p_hours;
 }
 
-void UserRequestSetTime::setMinutes(const int p_minutes)
+void UserRequestSetTime::setMinutes(int const p_minutes)
 {
     if (p_minutes < 0 || p_minutes > 59)
     {
-        throw ClockException("Minutes out of accepted range");
+        throw ClockException(std::string("Minutes out of accepted range") + std::to_string(p_minutes));
     }
 
-    minutes_ = p_minutes;
+    m_minutes = p_minutes;
 }
 
 
 int UserRequestSetTime::getHours() const
 {
-    return hours_;
+    return m_hours;
 }
 
 int UserRequestSetTime::getMinutes() const
 {
-    return minutes_;
+    return m_minutes;
 }
 
-int UserRequestSetTime::getTimeInMinutesPastZero() const
+int UserRequestSetTime::getTimeInMinutesPastMidnight() const
 {
-    return getTimeInMinutesPastZero(hours_, minutes_);
+    return getTimeInMinutesPastMidnight(m_hours, m_minutes);
 }
 
-int UserRequestSetTime::getTimeInMinutesPastZero(const int p_hours, const int p_minutes) const
+int UserRequestSetTime::getTimeInMinutesPastMidnight(int const p_hours, int const p_minutes) const
 {
     int calc = p_hours*60 + p_minutes;
     return calc;
 }
+
 
 } // namespace

@@ -10,8 +10,8 @@ namespace Clock {
 
 
 ClockApplication::ClockApplication() :
-    currentHours(0),
-    currentMinutes(0)
+    m_currentHours(0),
+    m_currentMinutes(0)
 {
 
 #ifdef _DEBUG
@@ -42,50 +42,51 @@ ClockApplication::~ClockApplication()
 void ClockApplication::go()
 {
     if (!setup())
+    {
         throw ClockException("Setup failed");
-        //return;
+        return;
+    }
 
-    // set clock to show current time of system
+    WebsocketInterface::init();
+    WebsocketAmbassador::clearRecvBuffer();
+
+    /* set clock to show current time of system */
     time_t t = time(0);
     struct tm * now = localtime(&t);
     adjustClock(now->tm_hour, now->tm_min);
 
-
-    WebsocketAmbassador::clearRecvBuffer();
-
-    // main event loop
+    /* main event loop starts */
     while(true)
     {
       Ogre::WindowEventUtilities::messagePump();
-
-      if(mWindow->isClosed()) break; // false;
-
-      if(!mRoot->renderOneFrame()) break; // false;
+      if(mWindow->isClosed()) break;
+      if(!mRoot->renderOneFrame()) break;
 
       // check for websocket messages
       WebsocketInterface::runService();
-
       WebsocketAmbassador::getMutex().lock();
+
       if (WebsocketAmbassador::getReceivedBytes() > 0)
       {
           CONSOLE_OUTPUT(WebsocketAmbassador::getReceivedBytes());
-        try
-        {
-            //IUserRequest * request = parseUserRequest(WebsocketAmbassador::getRecvBuffer());
-            userRequest request = parseUserRequest(WebsocketAmbassador::getRecvBuffer());
-            processUserRequest(request);
-        }
-        catch (ClockException &e)
-        {
-            CONSOLE_OUTPUT_ERROR(e.what());
-        }
+          try
+          {
+              userRequest request = parseUserRequest(WebsocketAmbassador::getRecvBuffer());
+              processUserRequest(request);
+          }
+          catch (ClockException &e)
+          {
+              CONSOLE_OUTPUT_ERROR(e.what());
+          }
 
-        WebsocketAmbassador::clearRecvBuffer();
+          WebsocketAmbassador::clearRecvBuffer();
       }
+
       WebsocketAmbassador::getMutex().unlock();
     }
 
     // Clean up
+    WebsocketInterface::finish();
     destroyScene();
 }
 
@@ -109,7 +110,7 @@ void ClockApplication::createScene()
 
 }
 
-void ClockApplication::processUserRequest(userRequest const &p_request)
+void ClockApplication::processUserRequest(userRequest const & p_request)
 {
     switch (p_request->getCommand())
     {
@@ -128,86 +129,101 @@ void ClockApplication::processUserRequest(userRequest const &p_request)
     }
 }
 
-void ClockApplication::adjustClock(const int hours, const int minutes)
+void ClockApplication::adjustClock(int const p_hours, int const p_minutes)
 {
-    std::cout << hours << " " << minutes << std::endl;
+    std::cout << p_hours << " " << p_minutes << std::endl;
 
-    if (hours < 0 || hours > 24)
+    if (p_hours < 0 || p_hours > 24)
     {
-        // invalid hours
-        throw ClockException(std::string("Invalid hours: ") + std::to_string(hours));
+        /* invalid hours */
+        throw ClockException(std::string("Invalid hours: ") + std::to_string(p_hours));
     }
 
-    if (minutes < 0 || minutes >= 60)
+    if (p_minutes < 0 || p_minutes >= 60)
     {
-        // invalid minutes
-        throw ClockException(std::string("Invalid minutes: ") + std::to_string(minutes));
+        /* invalid minutes */
+        throw ClockException(std::string("Invalid minutes: ") + std::to_string(p_minutes));
     }
 
-    int timeDiff = computeTime(hours, currentHours, minutes, currentMinutes);
+    int timeDiff = computeTimeDifference(p_hours, m_currentHours, p_minutes, m_currentMinutes);
 
-    // set hour hand
+    /* set hour hand */
     setHourHand(timeDiff);
-    currentHours = hours;
+    m_currentHours = p_hours;
 
-    // set minute hand
+    /* set minute hand */
     setMinuteHand(timeDiff);
-    currentMinutes = minutes;
+    m_currentMinutes = p_minutes;
 
-    CONSOLE_OUTPUT("Time set to " + std::to_string(currentHours) + ":" + std::to_string(currentMinutes));
+    /* write current time to sending buffer */
+    sendBuffer & buf = WebsocketAmbassador::getSendBuffer();
+    int currentTime = this->getCurrentTime();
+    char timeBuf[sizeof(currentTime)];
+    buf[0] = sizeof(currentTime);
+    std::string s = std::to_string(currentTime);
+    if (sizeof(currentTime) <= SENDBUFFER_SIZE)
+    {
+        for (int i=0; i < sizeof(currentTime); i++)
+        {
+            /* 1st byte of buffer reserved to size info */
+            buf[i+1] = s[i];
+        }
+    }
+
+    CONSOLE_OUTPUT("Time set to " + std::to_string(m_currentHours) + ":" + std::to_string(m_currentMinutes));
  }
 
-void ClockApplication::setHourHand(const int & timeDifference) const
+void ClockApplication::setHourHand(int const & p_timeDifference) const
 {
-    double hourAngleIncrement = static_cast<double>(timeDifference)/60;
+    double hourAngleIncrement = static_cast<double>(p_timeDifference)/60;
     hourAngleIncrement *= 30; // 30 (360/12) degrees equals the angle of a step of an hour
     std::cout << "steps hours " << hourAngleIncrement << std::endl;
     hourHandNode->yaw(-Ogre::Degree(hourAngleIncrement));
 }
 
-void ClockApplication::setMinuteHand(const int & timeDifference) const
+void ClockApplication::setMinuteHand(int const & p_timeDifference) const
 {
-    int minuteAngleIncrement = timeDifference % 60;
+    int minuteAngleIncrement = p_timeDifference % 60;
     minuteAngleIncrement = minuteAngleIncrement * 6; // 6 (360/60) degrees equals the angle of a step of a minute
     std::cout << "steps minutes " << minuteAngleIncrement << std::endl;
     minuteHandNode->yaw(-Ogre::Degree(minuteAngleIncrement));
 }
 
-// Convert time to minutes past midnight
-// TODO remove this from here
-int ClockApplication::convertTimeToMinutes(int hour, int min) const
+userRequest ClockApplication::parseUserRequest(recvBuffer const & p_buffer)
 {
+    // 2nd byte: command
+    char command;
+    memcpy(&command, &p_buffer[1], 1);
+
+    UserRequestCommand userReqCom = static_cast<UserRequestCommand>(atoi(&command));
+
+    return createUserRequestObject(userReqCom, p_buffer);
+}
+
+// Convert time to minutes past midnight
+int ClockApplication::convertTimeToMinutes(int const p_hour, int const p_min) const
+{
+    int hour = p_hour;
     if (hour == 12)
+    {
         hour = 0;
-    int calc = hour*60 + min;
+    }
+    int calc = hour*60 + p_min;
     return calc;
 }
 
 // Return the absolute time difference from current to target time in minutes
 // (how much forward the clock has to be turned)
-// TODO transfer to UserRequestSetTime class
-int ClockApplication::computeTime(int hour1, int hour2, int min1, int min2) const
+int ClockApplication::computeTimeDifference(int const p_hour1, int const p_hour2, int const p_min1, int const p_min2) const
 {
-    return convertTimeToMinutes(hour1, min1) -
-        convertTimeToMinutes(hour2, min2);
+    return convertTimeToMinutes(p_hour1, p_min1) -
+        convertTimeToMinutes(p_hour2, p_min2);
 }
-
 
 // return current time (past midnight)
 int ClockApplication::getCurrentTime()
 {
-    return convertTimeToMinutes(currentHours, currentMinutes);
-}
-
-userRequest ClockApplication::parseUserRequest(recvBuffer &buffer)
-{
-    // 2nd byte: command
-    char command;
-    memcpy(&command, &buffer[1], 1);
-
-    UserRequestCommand userReqCom = static_cast<UserRequestCommand>(atoi(&command));
-
-    return createUserRequestObject(userReqCom, buffer);
+    return convertTimeToMinutes(m_currentHours, m_currentMinutes);
 }
 
 }

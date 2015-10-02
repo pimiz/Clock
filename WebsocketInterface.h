@@ -3,6 +3,7 @@
 
 #include <libwebsockets.h>
 #include "BufferProvider.h"
+#include "CommonDefines.h"
 
 // Call the buffer provider WebsocketAmbassador to clarify its purpose on this app
 typedef BufferProvider WebsocketAmbassador;

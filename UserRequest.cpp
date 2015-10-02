@@ -1,12 +1,12 @@
 #include <memory>
-#include "IUserRequest.h"
+#include "UserRequest.h"
 #include "UserRequests.h"
 #include "ClockException.h"
 
 
 namespace Clock
 {
-userRequest createUserRequestObject(UserRequestCommand const p_command, std::array<char, 64> const &p_buffer)
+userRequest createUserRequestObject(UserRequestCommand const p_command, recvBuffer const &p_buffer)
 {
     switch (p_command)
     {
@@ -14,7 +14,8 @@ userRequest createUserRequestObject(UserRequestCommand const p_command, std::arr
             return std::make_shared<UserRequestSetTime>(p_buffer);
             break;
         default:
-            throw Clock::ClockException("Invalid command requested");
+            throw Clock::ClockException(std::string("Invalid command requested: ")
+                                        + std::to_string(static_cast<int>(p_command)));
             break;
     }
     return nullptr;
