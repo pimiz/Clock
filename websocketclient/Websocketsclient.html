@@ -1,48 +1,50 @@
 <!DOCTYPE html>
-
+<head>
+<link rel="stylesheet" type="text/css" href="Websocketsclient.css">
 <meta charset="utf-8" />
 
 <title>WebSocket Test</title>
 
 <script language="javascript" type="text/javascript">
 
-  var wsUri = 'ws://127.0.0.1:9999';
-  var input;
-  var output; 
+	var wsUri = 'ws://127.0.0.1:9999';
+	var input;
+	var output; 
+	var statusOutput;
 	var timeOutput;
+	var timeSetErrorOutput;
 
-  function init()
-  {
-    output = document.getElementById("output");
+  	function init()
+  	{
+    	output = document.getElementById("output");
 		timeOutput = document.getElementById("timeOutput");
-    input = document.getElementById("input");
-    testWebSocket();
-  }
+		statusOutput = document.getElementById("statusOutput");
+		input = document.getElementById("input");
+		timeSetErrorOutput = document.getElementById("timeSetErrorOutput");
+		initWebSocket();
+  	}
 
-  function testWebSocket()
-  {
-    websocket = new WebSocket(wsUri, 'my-protocol');
-    websocket.onopen = function(evt) { onOpen(evt) };
-    websocket.onclose = function(evt) { onClose(evt) };
-    websocket.onmessage = function(evt) { onMessage(evt) };
-    websocket.onerror = function(evt) { onError(evt) };
-  }
+  	function initWebSocket()
+  	{
+		websocket = new WebSocket(wsUri, 'my-protocol');
+		websocket.onopen = function(evt) { onOpen(evt) };
+		websocket.onclose = function(evt) { onClose(evt) };
+		websocket.onmessage = function(evt) { onMessage(evt) };
+		websocket.onerror = function(evt) { onError(evt) };
+  	}
 
-  function onOpen(evt)
-  {
-    writeToScreen("CONNECTED");
-    //doSend("WebSocketRocks");
-  }
+  	function onOpen(evt)
+  	{
+    	writeStatus("<span style=\"color: green;\">CONNECTED</span>");
+  	}
 
-  function onClose(evt)
-  {
-    writeToScreen("DISCONNECTED");
-  }
+  	function onClose(evt)
+  	{
+    	writeStatus("<span style=\"color: red;\">DISCONNECTED</span>");
+  	}
 
-  function onMessage(evt)
-  {
-    writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data+'</span>');
-		
+  	function onMessage(evt)
+  	{		
 		var time = convertTimeFromMinutes(parseInt(evt.data, 10));	
 
 		if (isNaN(parseInt(time[0], 10)) || isNaN(parseInt(time[1], 10)))
@@ -51,29 +53,23 @@
 		}
 
 		writeCurrentTime(time[0], time[1]);
+  	}
 
-//    websocket.close();
-  }
-
-  function onError(evt)
-  {
-    writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+  	function onError(evt)
+  	{
+    	writeStatus('<span style="color: red;">ERROR:</span> ' + evt.data);
 		websocket.close();
-  }
+  	}
 
-  function sendToWebSocket(message)
-  {
-    writeToScreen("SENT: " + message); 
-    websocket.send(message);
-  }
+  	function sendToWebSocket(message)
+  	{
+    	websocket.send(message);
+  	}
 
-  function writeToScreen(message)
-  {
-    var pre = document.createElement("p");
-    pre.style.wordWrap = "break-word";
-    pre.innerHTML = message;
-    output.appendChild(pre);
-  }
+ 	function writeStatus(message)
+  	{
+		statusOutput.innerHTML = message;
+  	}
 
 	function pad(n, width, z) 
 	{
@@ -82,22 +78,24 @@
   		return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
 	}
 
-  function setNewTimeTo3DClock()
-  {
-	if (isNaN(inputHours.value))
+	function setNewTimeTo3DClock()
 	{
-		// todo do something
-		return;
-	}
-	if (isNaN(inputMinutes.value))
-	{
-		// todo do something
-		return;
-	}
-	var payload = 1 + pad(parseInt(inputHours.value), 2) + pad(parseInt(inputMinutes.value), 2);
+		clearTimeSetError();
 
-	sendToWebSocket(payload);
-  }
+		if (isNaN(inputHours.value) || (parseInt(inputHours.value) < 0 || parseInt(inputHours.value) > 23))
+		{
+			writeTimeSetError("Invalid hours value");
+			return;
+		}
+		if (isNaN(inputMinutes.value) || (parseInt(inputMinutes.value) < 0 || parseInt(inputMinutes.value) > 59))
+		{
+			writeTimeSetError("Invalid minutes value");
+			return;
+		}
+		var payload = 1 + pad(parseInt(inputHours.value), 2) + pad(parseInt(inputMinutes.value), 2);
+
+		sendToWebSocket(payload);
+  	}
 
 	function requestCurrentTimeFrom3DClock()
 	{
@@ -115,43 +113,55 @@
 
 	function writeCurrentTime(hours, minutes)
 	{
-		var pre = document.createElement("p");
-   	pre.style.wordWrap = "break-word";
-   	pre.innerHTML = pad(hours, 2) + ":" + pad(minutes, 2);
-   	timeOutput.appendChild(pre);
+		timeOutput.innerHTML = pad(hours, 2) + ":" + pad(minutes, 2);
 	}
 
+	function writeTimeSetError(message)
+	{
+		timeSetErrorOutput.innerHTML = "<span style=\"color: red;\">" + message + "</span>";
+	}
 
+	function clearTimeSetError()
+	{
+		timeSetErrorOutput.innerHTML = "";
+	}
 
-  window.addEventListener("load", init, false);
-
-	websocket.onmessage = onMessage();
+  	window.addEventListener("load", init, false);
 
 </script>
+</head>
 
-<h2>WebSocket Test</h2>
-
-
-<table border="1">
+<body>
+<h2>Clock application web interface</h2>
+<table>
+	<tr>
+		<td>
+			<h3>Status:</h3>
+			<p id="statusOutput"></p>
+		</td>
+	</tr>
 	<tr>
 		<td>
 			<h3>Set time:</h3>
 			<form>
-			Hours
-			<input type="text" id="inputHours" size="2" />
-			Minutes
-			<input type="text" id="inputMinutes" size="2" />
-			<input type="button" name="setButton" value="set" onClick="setNewTimeTo3DClock()" />
+				Hours
+				<input type="text" id="inputHours" size="2" />
+				Minutes
+				<input type="text" id="inputMinutes" size="2" />
+				<input type="button" name="setButton" value="Set" onClick="setNewTimeTo3DClock()" />
+				<div id="timeSetErrorOutput"></div> 
 			</form>
 		</td>
+	</tr>
+	<tr>
 		<td>
 			<h3>Current time:</h3>
+			<div id="timeOutput"></div><br />
 			<form>			
-			<input type="button" name="requestButton" value="request" onClick="requestCurrentTimeFrom3DClock()" />
-			<div id="timeOutput"></div>
+				<input type="button" name="requestButton" value="Request" onClick="requestCurrentTimeFrom3DClock()" />
 			</form>
 		</td>
 	</tr>
 </table>
-
-<div id="output"></div>
+</body>
+</html>

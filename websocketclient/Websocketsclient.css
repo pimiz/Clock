@@ -1,0 +1,14 @@
+body {
+	font-family: "Times New Roman", Times, serif;
+}
+
+table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+table, td {
+    border: 1px solid black;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    padding: 5px;
+}
