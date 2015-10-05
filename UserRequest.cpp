@@ -6,7 +6,7 @@
 
 namespace Clock
 {
-userRequest createUserRequestObject(UserRequestCommand const p_command, recvBuffer const &p_buffer)
+UserRequestPtr createUserRequestObject(UserRequestCommand const p_command, RecvBuffer const &p_buffer)
 {
     switch (p_command)
     {

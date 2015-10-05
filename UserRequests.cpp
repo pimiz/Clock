@@ -25,6 +25,11 @@ UserRequestSetTime::~UserRequestSetTime()
 {
 }
 
+void UserRequestSetTime::process(ClockAdjusterPtr const & clockApp) const
+{
+    clockApp->adjustClock(m_hours, m_minutes);
+}
+
 void UserRequestSetTime::setHours(int const p_hours)
 {
     if (p_hours < 0 || p_hours > 23)

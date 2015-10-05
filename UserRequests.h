@@ -2,6 +2,7 @@
 #define USERREQUESTS_H
 
 #include "UserRequest.h"
+#include "IClockAdjuster.h"
 
 namespace Clock
 {
@@ -9,7 +10,7 @@ namespace Clock
 class UserRequestSetTime : public UserRequest
 {
 public:
-    UserRequestSetTime(recvBuffer const & p_buffer);
+    UserRequestSetTime(RecvBuffer const & p_buffer);
 
     ~UserRequestSetTime();
 
@@ -19,8 +20,10 @@ public:
 
     int getTimeInMinutesPastMidnight() const;
 
+    void process(ClockAdjusterPtr const & clockApp) const override;
+
 protected:
-    void construct(recvBuffer const & p_buffer) override;
+    void construct(RecvBuffer const & p_buffer) override;
 
 private:
     /* disable default constructor */

@@ -1,26 +1,27 @@
+#include <mutex>
 #include "BufferProvider.h"
 
-recvBuffer& BufferProvider::getRecvBuffer()
+RecvBuffer& BufferProvider::getRecvBuffer()
 {
-    static recvBuffer buffer;
+    static RecvBuffer buffer;
     return buffer;
 }
 
-sendBuffer& BufferProvider::getSendBuffer()
+SendBuffer& BufferProvider::getSendBuffer()
 {
-    static sendBuffer buffer;
+    static SendBuffer buffer;
     return buffer;
 }
 
 void BufferProvider::clearRecvBuffer()
 {
-    recvBuffer &buffer = BufferProvider::getRecvBuffer();
+    RecvBuffer &buffer = BufferProvider::getRecvBuffer();
     buffer.fill('0');
 }
 
 void BufferProvider::clearSendBuffer()
 {
-    sendBuffer &buffer = BufferProvider::getSendBuffer();
+    SendBuffer &buffer = BufferProvider::getSendBuffer();
     buffer.fill('0');
 }
 

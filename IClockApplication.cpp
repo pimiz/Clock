@@ -1,11 +1,13 @@
 #include "IClockApplication.h"
 #include "ClockApplication.h"
 
+using Clock::ClockApplicationPtr;
+
 namespace ClockPublic {
 
-std::unique_ptr<IClockApplication> createClockAppObject()
+ClockApplicationPtr createClockAppObject()
 {
-    return std::unique_ptr<Clock::ClockApplication>(new Clock::ClockApplication());
+    return std::shared_ptr<Clock::ClockApplication>(new Clock::ClockApplication());
 }
 
 }

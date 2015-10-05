@@ -102,6 +102,7 @@ set(HDRS
         ./ClockException.h
         ./CommonDefines.h
         ./IClockApplication.h
+        ./IClockAdjuster.h
         ./UserRequest.h
         ./UserRequests.h
         ./WebsocketInterface.h

@@ -3,7 +3,9 @@
 
 #include <memory> // std::unique_ptr
 #include "BaseApplication.h"
+#include "CommonDefines.h"
 
+using Clock::ClockApplicationPtr;
 
 namespace ClockPublic {
 
@@ -20,7 +22,7 @@ public:
 /* Use interface class pattern to only expose the interface
  * instead of actual class name to caller */
 
-std::unique_ptr<IClockApplication> createClockAppObject();
+ClockApplicationPtr createClockAppObject();
 
 } // namespace
 #endif // ICLOCKAPPLICATION_H

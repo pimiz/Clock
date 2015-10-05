@@ -11,7 +11,7 @@ extern "C" {
 int main(int argc, char *argv[])
     {
         /* Create application object */
-        std::unique_ptr<IClockApplication> app = createClockAppObject();
+        Clock::ClockApplicationPtr app = createClockAppObject();
 
         try
         {

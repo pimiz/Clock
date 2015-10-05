@@ -7,7 +7,7 @@
 #include <syslog.h>
 
 #include <signal.h>
-
+#include <mutex>
 #include <libwebsockets.h>
 #include <string>
 #include "WebsocketInterface.h"
@@ -15,6 +15,8 @@
 #include "ClockException.h"
 
 #include <iostream> //debug
+
+using Clock::MutexGuard;
 
 namespace WebsocketInterface {
 
@@ -67,19 +69,6 @@ int init()
         return -1;
     }
 
-/*
-    n = 0;
-    while (n >= 0 && !force_exit) {
-
-        n = libwebsocket_service(context, 50);
-
-    };//while n>=0
-
-
-    libwebsocket_context_destroy(context);
-
-    lwsl_notice("libwebsockets-test-server exited cleanly\n");
-*/
     closelog();
 
     return 0;
@@ -125,24 +114,21 @@ int my_protocol_callback(struct libwebsocket_context *context,
             throw Clock::ClockException(std::string("Too large data callback from Websocket interface (") + std::to_string(len) + ") bytes");
         }
 
-        WebsocketAmbassador::getMutex().lock();
+        MutexGuard lock(WebsocketAmbassador::getMutex());
 
-        recvBuffer& recvBuf = WebsocketAmbassador::getRecvBuffer();
+        RecvBuffer& recvBuf = WebsocketAmbassador::getRecvBuffer();
 
         // store length of received data to first element of buffer
         recvBuf[0] = std::to_string(len)[0];
 
-
         // check if an instant response is required
-
         char firstByte;
         memcpy(&firstByte, in, 1);
 
         if (firstByte == 'x')
         {
             // respond with current time shown on the clock
-
-            sendBuffer &sendBuf = WebsocketAmbassador::getSendBuffer();
+            SendBuffer &sendBuf = WebsocketAmbassador::getSendBuffer();
             char size = sendBuf[0];
             int sendDataSize = 0;
             memcpy(&sendDataSize, &sendBuf[0], sizeof(sendBuf[0]));

@@ -5,36 +5,31 @@
 #include <memory>
 #include "CommonDefines.h"
 
-namespace Clock
-{
-    class UserRequest;
-}
-
-typedef std::shared_ptr<Clock::UserRequest> userRequest;
 
 namespace Clock
 {
-
-enum class UserRequestCommand {SET_TIME = 1, CHANGE_COLOR = 2};
+    enum class UserRequestCommand {SET_TIME = 1, CHANGE_COLOR = 2};
 
 class UserRequest
 {
 public:
-    UserRequest(UserRequestCommand p_command) : command_(p_command) {};
+    UserRequest(UserRequestCommand p_command) : command_(p_command) {}
 
-    virtual ~UserRequest() {};
+    virtual ~UserRequest() {}
     UserRequestCommand getCommand()
     {
         return command_;
     }
 
+    virtual void process(ClockAdjusterPtr const & clockApp) const = 0;
+
 
 protected:
-    virtual void construct(recvBuffer const & buffer) {};
+    virtual void construct(RecvBuffer const & buffer) {};
     UserRequestCommand command_;
 };
 
-userRequest createUserRequestObject(UserRequestCommand const p_command, recvBuffer const &p_buffer);
+UserRequestPtr createUserRequestObject(UserRequestCommand const p_command, RecvBuffer const &p_buffer);
 
 }
 

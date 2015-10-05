@@ -1,13 +1,13 @@
 #include <sstream>
 #include <ctime>
 #include <OgreWindowEventUtilities.h>
+#include <mutex>
 #include "ClockApplication.h"
 #include "WebsocketInterface.h"
 #include "ClockException.h"
 #include "UserRequests.h"
 
 namespace Clock {
-
 
 ClockApplication::ClockApplication() :
     m_currentHours(0),
@@ -56,38 +56,50 @@ void ClockApplication::go()
     adjustClock(now->tm_hour, now->tm_min);
 
     /* main event loop starts */
-    while(true)
+    while(runEventLoop())
     {
-      Ogre::WindowEventUtilities::messagePump();
-      if(mWindow->isClosed()) break;
-      if(!mRoot->renderOneFrame()) break;
-
-      // check for websocket messages
-      WebsocketInterface::runService();
-      WebsocketAmbassador::getMutex().lock();
-
-      if (WebsocketAmbassador::getReceivedBytes() > 0)
-      {
-          CONSOLE_OUTPUT(WebsocketAmbassador::getReceivedBytes());
-          try
-          {
-              userRequest request = parseUserRequest(WebsocketAmbassador::getRecvBuffer());
-              processUserRequest(request);
-          }
-          catch (ClockException &e)
-          {
-              CONSOLE_OUTPUT_ERROR(e.what());
-          }
-
-          WebsocketAmbassador::clearRecvBuffer();
-      }
-
-      WebsocketAmbassador::getMutex().unlock();
+        continue;
     }
 
     // Clean up
     WebsocketInterface::finish();
     destroyScene();
+}
+
+bool ClockApplication::runEventLoop()
+{
+    Ogre::WindowEventUtilities::messagePump();
+    if(mWindow->isClosed()) return false;
+    if(!mRoot->renderOneFrame()) return false;
+
+    /* check for websocket messages */
+    WebsocketInterface::runService();
+
+    /* lock the buffer mutex. when using std::lock_guard the lock
+     * gets automatically released when going out of scope */
+    MutexGuard lock(WebsocketAmbassador::getMutex());
+
+    if (WebsocketAmbassador::getReceivedBytes() > 0)
+    {
+        CONSOLE_OUTPUT(WebsocketAmbassador::getReceivedBytes());
+        try
+        {
+            UserRequestPtr request = parseUserRequest(WebsocketAmbassador::getRecvBuffer());
+
+            /* expose only the IClockAdjuster interface from ClockApplication
+             * to the user request object -> no need to know the user request type
+             * (user given command) in ClockApplication */
+            request->process(shared_from_this());
+        }
+        catch (ClockException &e)
+        {
+            CONSOLE_OUTPUT_ERROR(e.what());
+        }
+
+        WebsocketAmbassador::clearRecvBuffer();
+    }
+
+    return true;
 }
 
 void ClockApplication::createScene()
@@ -104,35 +116,14 @@ void ClockApplication::createScene()
     minuteHandNode->attachObject(minuteHand);
     clockFaceNode->attachObject(clockFace);
 
-    // align camera directly on clock
+    /* align camera facing directly the clock */
     mCamera->setPosition(0, clockFaceNode->getPosition().y + 6, 0);
     mCamera->pitch(Ogre::Degree(270));
 
 }
 
-void ClockApplication::processUserRequest(userRequest const & p_request)
-{
-    switch (p_request->getCommand())
-    {
-    case UserRequestCommand::SET_TIME: // adjust time
-    {
-        std::shared_ptr<UserRequestSetTime> setTime = std::dynamic_pointer_cast<UserRequestSetTime>(p_request);
-        adjustClock(setTime->getHours(), setTime->getMinutes());
-        break;
-    }
-    case UserRequestCommand::CHANGE_COLOR:
-    {
-        // TODO implement
-    }
-    default:
-        break;
-    }
-}
-
 void ClockApplication::adjustClock(int const p_hours, int const p_minutes)
 {
-    std::cout << p_hours << " " << p_minutes << std::endl;
-
     if (p_hours < 0 || p_hours > 24)
     {
         /* invalid hours */
@@ -156,7 +147,7 @@ void ClockApplication::adjustClock(int const p_hours, int const p_minutes)
     m_currentMinutes = p_minutes;
 
     /* write current time to sending buffer */
-    sendBuffer & buf = WebsocketAmbassador::getSendBuffer();
+    SendBuffer & buf = WebsocketAmbassador::getSendBuffer();
     int currentTime = this->getCurrentTime();
     char timeBuf[sizeof(currentTime)];
     buf[0] = sizeof(currentTime);
@@ -176,31 +167,29 @@ void ClockApplication::adjustClock(int const p_hours, int const p_minutes)
 void ClockApplication::setHourHand(int const & p_timeDifference) const
 {
     double hourAngleIncrement = static_cast<double>(p_timeDifference)/60;
-    hourAngleIncrement *= 30; // 30 (360/12) degrees equals the angle of a step of an hour
-    std::cout << "steps hours " << hourAngleIncrement << std::endl;
+    /* 30 (360/12) degrees equals the angle of a step of an hour */
+    hourAngleIncrement *= 30;
     hourHandNode->yaw(-Ogre::Degree(hourAngleIncrement));
 }
 
 void ClockApplication::setMinuteHand(int const & p_timeDifference) const
 {
     int minuteAngleIncrement = p_timeDifference % 60;
-    minuteAngleIncrement = minuteAngleIncrement * 6; // 6 (360/60) degrees equals the angle of a step of a minute
-    std::cout << "steps minutes " << minuteAngleIncrement << std::endl;
+    /* 6 (360/60) degrees equals the angle of a step of a minute */
+    minuteAngleIncrement = minuteAngleIncrement * 6;
     minuteHandNode->yaw(-Ogre::Degree(minuteAngleIncrement));
 }
 
-userRequest ClockApplication::parseUserRequest(recvBuffer const & p_buffer)
+UserRequestPtr ClockApplication::parseUserRequest(RecvBuffer const & p_buffer)
 {
-    // 2nd byte: command
+    /* 2nd byte: command */
     char command;
     memcpy(&command, &p_buffer[1], 1);
-
     UserRequestCommand userReqCom = static_cast<UserRequestCommand>(atoi(&command));
-
     return createUserRequestObject(userReqCom, p_buffer);
 }
 
-// Convert time to minutes past midnight
+/* Convert time to minutes past midnight */
 int ClockApplication::convertTimeToMinutes(int const p_hour, int const p_min) const
 {
     int hour = p_hour;
@@ -212,15 +201,15 @@ int ClockApplication::convertTimeToMinutes(int const p_hour, int const p_min) co
     return calc;
 }
 
-// Return the absolute time difference from current to target time in minutes
-// (how much forward the clock has to be turned)
+/* Return the absolute time difference from current to target time in minutes
+ * (how much forward the clock has to be turned) */
 int ClockApplication::computeTimeDifference(int const p_hour1, int const p_hour2, int const p_min1, int const p_min2) const
 {
     return convertTimeToMinutes(p_hour1, p_min1) -
         convertTimeToMinutes(p_hour2, p_min2);
 }
 
-// return current time (past midnight)
+/* Return current time (past midnight) */
 int ClockApplication::getCurrentTime()
 {
     return convertTimeToMinutes(m_currentHours, m_currentMinutes);

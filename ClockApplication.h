@@ -4,13 +4,16 @@
 #include <memory>
 #include "BufferProvider.h"
 #include "IClockApplication.h"
-#include "ITimeRequester.h"
+#include "IClockAdjuster.h"
 #include "UserRequest.h"
 
 
 namespace Clock {
 
-class ClockApplication : public ClockPublic::IClockApplication, public TimeRequester::ITimeRequester
+class ClockApplication :
+        public std::enable_shared_from_this<ClockApplication>,
+        public ClockPublic::IClockApplication,
+        public ClockPublic::IClockAdjuster
 {
 public:
     ClockApplication();
@@ -20,15 +23,13 @@ public:
     void go() override;
     void createScene() override;
 
-    /* Function inherited from ITimeRequester */
-    int getCurrentTime() override;
+    /* Function inherited from IClockAdjuster */
+    void adjustClock(int const p_hours, int const p_minutes) override;
 
 protected:
+    UserRequestPtr parseUserRequest(RecvBuffer const & p_buffer);
+    bool runEventLoop();
 
-    void processUserRequest(userRequest const & p_request);
-    userRequest parseUserRequest(recvBuffer const & p_buffer);
-
-    void adjustClock(int const p_hours, int const p_minutes);
     void setHourHand(int const & p_timeDifference) const;
     void setMinuteHand(int const & p_timeDifference) const;
 
@@ -37,6 +38,7 @@ protected:
     // (how much forward the clock has to be turned)
     int computeTimeDifference(int const p_hour1, int const p_hour2, int const p_min1, int const p_min2) const;
 
+    int getCurrentTime();
 
 private:
     // Disable copy ctor

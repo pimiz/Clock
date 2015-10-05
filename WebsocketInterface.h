@@ -6,7 +6,7 @@
 #include "CommonDefines.h"
 
 // Call the buffer provider WebsocketAmbassador to clarify its purpose on this app
-typedef BufferProvider WebsocketAmbassador;
+using WebsocketAmbassador = BufferProvider;
 
 namespace WebsocketInterface {
 
