@@ -1,7 +1,10 @@
 #include <sstream>
 #include <ctime>
 #include <OgreWindowEventUtilities.h>
+#include <OgreSubEntity.h>
+#include <OgreMaterial.h>
 #include <mutex>
+#include <regex>
 #include "ClockApplication.h"
 #include "WebsocketInterface.h"
 #include "ClockException.h"
@@ -55,6 +58,10 @@ void ClockApplication::go()
     struct tm * now = localtime(&t);
     adjustClock(now->tm_hour, now->tm_min);
 
+    setClockFaceColour("#FF0000");
+    setHourHandColour("#00FF00");
+    setMinuteHandColour("#0000FF");
+
     /* main event loop starts */
     while(runEventLoop())
     {
@@ -86,10 +93,13 @@ bool ClockApplication::runEventLoop()
         {
             UserRequestPtr request = parseUserRequest(WebsocketAmbassador::getRecvBuffer());
 
-            /* expose only the IClockAdjuster interface from ClockApplication
-             * to the user request object -> no need to know the user request type
-             * (user given command) in ClockApplication */
-            request->process(shared_from_this());
+            if (request.get())
+            {
+                /* expose only the IClockAdjuster interface from ClockApplication
+                 * to the user request object -> no need to know the user request type
+                 * (user given command) in ClockApplication */
+                request->process(shared_from_this());
+            }
         }
         catch (ClockException &e)
         {
@@ -162,7 +172,59 @@ void ClockApplication::adjustClock(int const p_hours, int const p_minutes)
     }
 
     CONSOLE_OUTPUT("Time set to " + std::to_string(m_currentHours) + ":" + std::to_string(m_currentMinutes));
- }
+}
+
+void ClockApplication::setClockFaceColour(std::string const & p_clockFaceRGBA)
+{
+    setAmbientColourValue(clockFace->getSubEntity(0)->getMaterial(), p_clockFaceRGBA);
+}
+
+void ClockApplication::setHourHandColour(std::string const & p_hourHandRGBA)
+{
+    setAmbientColourValue(hourHand->getSubEntity(0)->getMaterial(), p_hourHandRGBA);
+}
+
+void ClockApplication::setMinuteHandColour(std::string const & p_minuteHandRGBA)
+{
+    setAmbientColourValue(minuteHand->getSubEntity(0)->getMaterial(), p_minuteHandRGBA);
+}
+
+void ClockApplication::setAmbientColourValue(Ogre::MaterialPtr const & p_material, std::string const & p_RGBA)
+{
+    p_material->setAmbient(parseToColourValue(p_RGBA));
+}
+
+Ogre::ColourValue ClockApplication::parseToColourValue(std::string const & p_rgbaValue) const
+{
+    CONSOLE_OUTPUT(p_rgbaValue);
+
+    Ogre::RGBA rgba;
+
+    try {
+        /* red */
+        rgba = (rgba << 8) + std::stoi(p_rgbaValue.substr(1,2), 0, 16);
+
+        /* green */
+        rgba = (rgba << 8) + std::stoi(p_rgbaValue.substr(3,2), 0, 16);
+
+        /* blue */
+        rgba = (rgba << 8) + std::stoi(p_rgbaValue.substr(5,2), 0, 16);
+
+        /* assume that RGB value is in format #xxxxxx
+           use alpha value of 128 always */
+        rgba = (rgba << 8) + 128;
+    }
+    catch (std::exception &e)
+    {
+        throw ClockException(std::string("Error in RGB value parsing, value was: ") + p_rgbaValue + " / " + e.what());
+    }
+
+    Ogre::ColourValue cv;
+    cv.setAsRGBA(rgba);
+
+    return cv;
+
+}
 
 void ClockApplication::setHourHand(int const & p_timeDifference) const
 {
@@ -182,7 +244,7 @@ void ClockApplication::setMinuteHand(int const & p_timeDifference) const
 
 UserRequestPtr ClockApplication::parseUserRequest(RecvBuffer const & p_buffer)
 {
-    /* 2nd byte: command */
+    /* 2nd byte: command (user request type)*/
     char command;
     memcpy(&command, &p_buffer[1], 1);
     UserRequestCommand userReqCom = static_cast<UserRequestCommand>(atoi(&command));

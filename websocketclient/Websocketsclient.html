@@ -5,8 +5,15 @@
 
 <title>WebSocket Test</title>
 
-<script src="Websocketsclient.js"> </script>
-
+<script src="jquery-2.1.4.min.js"></script>
+<script src="Websocketsclient.js"></script>
+<script src="colors.js"></script>
+<script type="text/javascript" src="jqColorPicker.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    $('.color').colorPicker(); 
+});
+</script>
 </head>
 
 <body>
@@ -28,6 +35,26 @@
 				<input type="text" id="inputMinutes" size="2" />
 				<input type="button" name="setButton" value="Set" onClick="setNewTimeTo3DClock()" />
 				<div id="timeSetErrorOutput"></div> 
+			</form>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<h3>Set colours:</h3>
+			<form>
+				Clock face
+				<div class="input-toggles">
+					<input class="color" value="#B6BD79" id="clockFaceColourInput"/>
+				</div>
+				Hour hand
+				<div class="input-toggles">
+					<input class="color no-alpha" value="#B6BD79" id="hourHandColourInput"/>
+				</div>
+				Minute hand
+				<div class="input-toggles">
+					<input class="color no-alpha" value="#B6BD79" id="minuteHandColourInput"/>
+				</div>
+				<input type="button" name="setColoursButton" value="Set" onClick="setColoursOf3DClock()" />
 			</form>
 		</td>
 	</tr>

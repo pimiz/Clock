@@ -5,6 +5,9 @@
 	var statusOutput;
 	var timeOutput;
 	var timeSetErrorOutput;
+	var clockFaceColourInput;
+	var hourHandColourInput;
+	var minuteHandColourInput;
 
   	function init()
   	{
@@ -13,6 +16,9 @@
 		statusOutput = document.getElementById("statusOutput");
 		input = document.getElementById("input");
 		timeSetErrorOutput = document.getElementById("timeSetErrorOutput");
+		clockFaceColourInput = document.getElementById("clockFaceColourInput");
+		hourHandColourInput = document.getElementById("hourHandColourInput");
+		minuteHandColourInput = document.getElementById("minuteHandColourInput");
 		initWebSocket();
   	}
 
@@ -116,6 +122,12 @@
 	function clearTimeSetError()
 	{
 		timeSetErrorOutput.innerHTML = "";
+	}
+
+	function setColoursOf3DClock()
+	{
+		var msg = "2" + clockFaceColourInput.value + hourHandColourInput.value + minuteHandColourInput.value;
+		sendToWebSocket(msg);
 	}
 
   	window.addEventListener("load", init, false);

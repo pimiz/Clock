@@ -12,7 +12,8 @@ UserRequestPtr createUserRequestObject(UserRequestCommand const p_command, RecvB
     {
         case UserRequestCommand::SET_TIME:
             return std::make_shared<UserRequestSetTime>(p_buffer);
-            break;
+        case UserRequestCommand::SET_COLOURS:
+            return std::make_shared<UserRequestSetColours>(p_buffer);
         default:
             throw Clock::ClockException(std::string("Invalid command requested: ")
                                         + std::to_string(static_cast<int>(p_command)));

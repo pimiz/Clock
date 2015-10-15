@@ -10,6 +10,10 @@
 #include <mutex>
 #include <libwebsockets.h>
 #include <string>
+
+#include <iomanip>
+#include <sstream>
+
 #include "WebsocketInterface.h"
 #include "BufferProvider.h"
 #include "ClockException.h"
@@ -108,8 +112,8 @@ int my_protocol_callback(struct libwebsocket_context *context,
     {
         /* message from client received.
            check if length of received data is in allowed limits.
-           one byte is reserved for length information */
-        if (len >= RECVBUFFER_SIZE)
+           two bytes are reserved for length information */
+        if (len > RECVBUFFER_SIZE - 2)
         {
             throw Clock::ClockException(std::string("Too large data callback from Websocket interface (") + std::to_string(len) + ") bytes");
         }
@@ -118,12 +122,16 @@ int my_protocol_callback(struct libwebsocket_context *context,
 
         RecvBuffer& recvBuf = WebsocketAmbassador::getRecvBuffer();
 
-        // store length of received data to first element of buffer
-        recvBuf[0] = std::to_string(len)[0];
+        /* store length of received data to first two elements of buffer */
+        std::stringstream ss;
+        ss << std::setfill('0') << std::setw(2) << len << std::endl;
+        std::string lenStr = ss.str();
+        lenStr.copy(&recvBuf[0], 2);
 
-        // check if an instant response is required
+        /* check if an instant response is required, i.e. do we find
+           a special character as the third byte */
         char firstByte;
-        memcpy(&firstByte, in, 1);
+        memcpy(&firstByte, in+2, 1);
 
         if (firstByte == 'x')
         {
@@ -144,9 +152,6 @@ int my_protocol_callback(struct libwebsocket_context *context,
             /* copy received data to buffer for further processing */
             memcpy(&recvBuf[1], in, len);
         }
-
-        WebsocketAmbassador::getMutex().unlock();
-
     }
     case LWS_CALLBACK_FILTER_PROTOCOL_CONNECTION:
         break;

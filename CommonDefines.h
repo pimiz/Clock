@@ -3,7 +3,7 @@
 #define CONSOLE_OUTPUT(X) std::cout << X << std::endl;
 #define CONSOLE_OUTPUT_ERROR(X) std::cerr << X << std::endl;
 
-/* forward dclrs of necessary std components */
+/* forward declare necessary std components to avoid unnecessary #including */
 namespace std {
 template<typename T, std::size_t N>
     struct array;

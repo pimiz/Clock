@@ -8,7 +8,7 @@
 
 namespace Clock
 {
-    enum class UserRequestCommand {SET_TIME = 1, CHANGE_COLOR = 2};
+    enum class UserRequestCommand {SET_TIME = 1, SET_COLOURS = 2};
 
 class UserRequest
 {

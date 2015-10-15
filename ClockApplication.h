@@ -23,8 +23,11 @@ public:
     void go() override;
     void createScene() override;
 
-    /* Function inherited from IClockAdjuster */
-    void adjustClock(int const p_hours, int const p_minutes) override;
+    /* Functions inherited from IClockAdjuster */
+    void adjustClock(int const p_hours, int const p_minutes) override;    
+    void setClockFaceColour(std::string const & p_clockFaceRGBA) override;
+    void setHourHandColour(std::string const & p_hourHandRGBA) override;
+    void setMinuteHandColour(std::string const & p_minuteHandRGBA) override;
 
 protected:
     UserRequestPtr parseUserRequest(RecvBuffer const & p_buffer);
@@ -32,6 +35,9 @@ protected:
 
     void setHourHand(int const & p_timeDifference) const;
     void setMinuteHand(int const & p_timeDifference) const;
+
+    Ogre::ColourValue parseToColourValue(std::string const & p_rgbaValue) const;
+    void setAmbientColourValue(Ogre::MaterialPtr const & p_material, std::string const & p_RGBA);
 
     int convertTimeToMinutes(int const p_hour, int const p_min) const;
     // Return the absolute time difference from current to target time in minutes
