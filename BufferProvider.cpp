@@ -1,5 +1,6 @@
 #include <mutex>
 #include "BufferProvider.h"
+#include <iostream>
 
 RecvBuffer& BufferProvider::getRecvBuffer()
 {
@@ -27,8 +28,9 @@ void BufferProvider::clearSendBuffer()
 
 int BufferProvider::getReceivedBytes()
 {
-    char size = BufferProvider::getRecvBuffer().front();
-    return atoi(&size);
+    RecvBuffer & buf = BufferProvider::getRecvBuffer();
+    int bytes = atoi(std::string(buf.begin(), USERREQUEST_SIZE_LENGTH).c_str());
+    return bytes;
 }
 
 int BufferProvider::getSentBytes()

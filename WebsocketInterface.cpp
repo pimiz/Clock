@@ -94,15 +94,13 @@ int my_protocol_callback(struct libwebsocket_context *context,
              enum libwebsocket_callback_reasons reason,
                  void *user, void *in, size_t len)
 {
-    int n, m;
     unsigned char buf[LWS_SEND_BUFFER_PRE_PADDING + 512 +
                           LWS_SEND_BUFFER_POST_PADDING];
-
 
     switch (reason) {
 
     case LWS_CALLBACK_ESTABLISHED:
-            printf("New Connection\n");
+            CONSOLE_OUTPUT("New Connection");
         break;
 
     case LWS_CALLBACK_SERVER_WRITEABLE:
@@ -119,29 +117,19 @@ int my_protocol_callback(struct libwebsocket_context *context,
         }
 
         MutexGuard lock(WebsocketAmbassador::getMutex());
-
         RecvBuffer& recvBuf = WebsocketAmbassador::getRecvBuffer();
 
-        /* store length of received data to first two elements of buffer */
-        std::stringstream ss;
-        ss << std::setfill('0') << std::setw(2) << len << std::endl;
-        std::string lenStr = ss.str();
-        lenStr.copy(&recvBuf[0], 2);
-
         /* check if an instant response is required, i.e. do we find
-           a special character as the third byte */
+           a special character as the first byte */
         char firstByte;
-        memcpy(&firstByte, in+2, 1);
+        memcpy(&firstByte, static_cast<char*>(in), 1);
 
-        if (firstByte == 'x')
+        if (firstByte == TIMEREQUEST_CHAR)
         {
-            // respond with current time shown on the clock
+            /* respond with current time shown on the clock */
             SendBuffer &sendBuf = WebsocketAmbassador::getSendBuffer();
-            char size = sendBuf[0];
             int sendDataSize = 0;
             memcpy(&sendDataSize, &sendBuf[0], sizeof(sendBuf[0]));
-            CONSOLE_OUTPUT(std::string("senddatasize: ") + std::to_string(sendDataSize));
-
             for (int i=0; i <= sendDataSize; i++) {
                 buf[LWS_SEND_BUFFER_PRE_PADDING + i ] = sendBuf[i+1];
             }
@@ -149,8 +137,14 @@ int my_protocol_callback(struct libwebsocket_context *context,
         }
         else
         {
-            /* copy received data to buffer for further processing */
-            memcpy(&recvBuf[1], in, len);
+            /* store length of received data to first two elements of buffer */
+            std::stringstream ss;
+            ss << std::setfill('0') << std::setw(2) << len << std::endl;
+            std::string lenStr = ss.str();
+            lenStr.copy(&recvBuf[USERREQUEST_SIZE_POSITION], USERREQUEST_SIZE_LENGTH);
+
+            /* copy received data to buffer after size information for further processing */
+            memcpy(&recvBuf[USERREQUEST_SIZE_POSITION + USERREQUEST_SIZE_LENGTH], in, len);
         }
     }
     case LWS_CALLBACK_FILTER_PROTOCOL_CONNECTION:

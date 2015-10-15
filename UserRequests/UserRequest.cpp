@@ -1,6 +1,7 @@
 #include <memory>
 #include "UserRequest.h"
-#include "UserRequests.h"
+#include "UserRequestSetColours.h"
+#include "UserRequestSetTime.h"
 #include "ClockException.h"
 
 

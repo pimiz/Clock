@@ -1,7 +1,15 @@
+#ifndef COMMONDEFINES_H
+#define COMMONDEFINES_H
+
 #define RECVBUFFER_SIZE 64
 #define SENDBUFFER_SIZE 64
+#define USERREQUEST_COMMAND_POSITION 2
+#define USERREQUEST_SIZE_POSITION 0
+#define USERREQUEST_SIZE_LENGTH 2
 #define CONSOLE_OUTPUT(X) std::cout << X << std::endl;
 #define CONSOLE_OUTPUT_ERROR(X) std::cerr << X << std::endl;
+
+static const char TIMEREQUEST_CHAR = 'x';
 
 /* forward declare necessary std components to avoid unnecessary #including */
 namespace std {
@@ -28,5 +36,6 @@ namespace Clock {
     using ClockAdjusterPtr = std::shared_ptr<ClockPublic::IClockAdjuster>;
     using ClockApplicationPtr = std::shared_ptr<ClockPublic::IClockApplication>;
     using UserRequestPtr = std::shared_ptr<Clock::UserRequest>;
-
 }
+
+#endif

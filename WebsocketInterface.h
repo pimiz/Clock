@@ -5,7 +5,7 @@
 #include "BufferProvider.h"
 #include "CommonDefines.h"
 
-// Call the buffer provider WebsocketAmbassador to clarify its purpose on this app
+/* Call the buffer provider WebsocketAmbassador to clarify its purpose on this app */
 using WebsocketAmbassador = BufferProvider;
 
 namespace WebsocketInterface {
@@ -25,9 +25,6 @@ namespace WebsocketInterface {
              enum libwebsocket_callback_reasons reason, void *user,
              void *in, size_t len);
     static void sighandler(int sig);
-
-    //struct libwebsocket_context *context;
-
 
     //**************************************************************************//
     /* list of supported protocols and callbacks */

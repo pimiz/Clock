@@ -103,9 +103,10 @@ set(HDRS
         ./CommonDefines.h
         ./IClockApplication.h
         ./IClockAdjuster.h
-        ./UserRequest.h
-        ./UserRequests.h
         ./WebsocketInterface.h
+        ./UserRequests/UserRequest.h
+        ./UserRequests/UserRequestSetColours.h
+        ./UserRequests/UserRequestSetTime.h
 )
  
 set(SRCS
@@ -114,9 +115,10 @@ set(SRCS
         ./Clock.cpp
         ./ClockApplication.cpp
         ./IClockApplication.cpp
-        ./UserRequest.cpp
-        ./UserRequests.cpp
         ./WebsocketInterface.cpp
+        ./UserRequests/UserRequest.cpp
+        ./UserRequests/UserRequestSetColours.cpp
+        ./UserRequests/UserRequestSetTime.cpp
 )
 
 
@@ -125,6 +127,7 @@ include_directories( ${OIS_INCLUDE_DIRS}
 	${OGRE_SAMPLES_INCLUDEPATH}
         /usr/include/
         /usr/local/include/OGRE/Overlay/
+        ./
 )
  
 add_executable(Clock WIN32 ${HDRS} ${SRCS})

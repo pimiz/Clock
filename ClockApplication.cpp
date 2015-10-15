@@ -8,7 +8,7 @@
 #include "ClockApplication.h"
 #include "WebsocketInterface.h"
 #include "ClockException.h"
-#include "UserRequests.h"
+#include "UserRequests/UserRequests.h"
 
 namespace Clock {
 
@@ -68,7 +68,7 @@ void ClockApplication::go()
         continue;
     }
 
-    // Clean up
+    /* clean up */
     WebsocketInterface::finish();
     destroyScene();
 }
@@ -88,7 +88,6 @@ bool ClockApplication::runEventLoop()
 
     if (WebsocketAmbassador::getReceivedBytes() > 0)
     {
-        CONSOLE_OUTPUT(WebsocketAmbassador::getReceivedBytes());
         try
         {
             UserRequestPtr request = parseUserRequest(WebsocketAmbassador::getRecvBuffer());
@@ -126,7 +125,7 @@ void ClockApplication::createScene()
     minuteHandNode->attachObject(minuteHand);
     clockFaceNode->attachObject(clockFace);
 
-    /* align camera facing directly the clock */
+    /* align camera to face directly the clock */
     mCamera->setPosition(0, clockFaceNode->getPosition().y + 6, 0);
     mCamera->pitch(Ogre::Degree(270));
 
@@ -194,21 +193,19 @@ void ClockApplication::setAmbientColourValue(Ogre::MaterialPtr const & p_materia
     p_material->setAmbient(parseToColourValue(p_RGBA));
 }
 
-Ogre::ColourValue ClockApplication::parseToColourValue(std::string const & p_rgbaValue) const
+Ogre::ColourValue ClockApplication::parseToColourValue(std::string const & p_rgbValue) const
 {
-    CONSOLE_OUTPUT(p_rgbaValue);
-
     Ogre::RGBA rgba;
 
     try {
         /* red */
-        rgba = (rgba << 8) + std::stoi(p_rgbaValue.substr(1,2), 0, 16);
+        rgba = (rgba << 8) + std::stoi(p_rgbValue.substr(1,2), 0, 16);
 
         /* green */
-        rgba = (rgba << 8) + std::stoi(p_rgbaValue.substr(3,2), 0, 16);
+        rgba = (rgba << 8) + std::stoi(p_rgbValue.substr(3,2), 0, 16);
 
         /* blue */
-        rgba = (rgba << 8) + std::stoi(p_rgbaValue.substr(5,2), 0, 16);
+        rgba = (rgba << 8) + std::stoi(p_rgbValue.substr(5,2), 0, 16);
 
         /* assume that RGB value is in format #xxxxxx
            use alpha value of 128 always */
@@ -216,7 +213,7 @@ Ogre::ColourValue ClockApplication::parseToColourValue(std::string const & p_rgb
     }
     catch (std::exception &e)
     {
-        throw ClockException(std::string("Error in RGB value parsing, value was: ") + p_rgbaValue + " / " + e.what());
+        throw ClockException(std::string("Error in RGB value parsing, value was: ") + p_rgbValue + " / " + e.what());
     }
 
     Ogre::ColourValue cv;
@@ -246,7 +243,7 @@ UserRequestPtr ClockApplication::parseUserRequest(RecvBuffer const & p_buffer)
 {
     /* 2nd byte: command (user request type)*/
     char command;
-    memcpy(&command, &p_buffer[1], 1);
+    memcpy(&command, &p_buffer[USERREQUEST_COMMAND_POSITION], 1);
     UserRequestCommand userReqCom = static_cast<UserRequestCommand>(atoi(&command));
     return createUserRequestObject(userReqCom, p_buffer);
 }

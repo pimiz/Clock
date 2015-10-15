@@ -1,7 +1,7 @@
 #ifndef ICLOCKAPPLICATION_H
 #define ICLOCKAPPLICATION_H
 
-#include <memory> // std::unique_ptr
+#include <memory>
 #include "BaseApplication.h"
 #include "CommonDefines.h"
 
@@ -14,7 +14,7 @@ class IClockApplication : public BaseApplication
 public:
     virtual ~IClockApplication() {};
 
-    // Functions inherited from BaseApplication
+    /* Functions inherited from BaseApplication */
     virtual void go() = 0;
     virtual void createScene() = 0;
 };
