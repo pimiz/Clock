@@ -1,0 +1,14 @@
+Clock - A 3D analog clock featuring a bidirectional websocket interface for controlling
+
+PLEASE NOTE THAT THIS IS WORK IN PROGRESS SO SOME FEATURES MAY NOT WORK AS EXPECTED!
+
+This application has been developed and tested on Ubuntu Linux 14.04 using GCC 4.9.2 as compiler and Qt Creator 3.0.1 as IDE.
+
+Author: juha@pimia.net
+
+Components/applications/tools used:
+- OGRE: A free, open source 3D rendering library/framework, http://www.ogre3d.org
+- Blender: A free 3D modeling software, http://www.blender.org
+- libwebsockets: A free websockets library written in C, https://libwebsockets.org
+- jQuery: A free javascript framework, http://jquery.com
+- ColorPicker: A free javascript-based color picker tool, http://www.dematte.at/tinyColorPicker
