@@ -33,13 +33,13 @@ void UserRequestSetColours::construct(RecvBuffer const & p_buffer)
     /* check validity of buffer string format */
     if (!std::regex_match(localBuf, matches, regex))
     {
-        throw ClockException(std::string("Could not parse RGBA values: ")+localBuf);
+        throw ClockException(std::string("Could not parse RGB values: ")+localBuf);
     }
 
     /* parse RGB values from buffer */
     int iter = 0;
 
-    while (std::regex_search (localBuf, matches, regex)) {
+    while (std::regex_search(localBuf, matches, regex)) {
         for (auto match:matches)
         {
             switch (iter)

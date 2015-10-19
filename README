@@ -1,14 +1,24 @@
-Clock - A 3D analog clock featuring a bidirectional websocket interface for controlling
+Clock - A 3D analog clock C++ application featuring a bidirectional websocket interface for controlling
+
+Author: juha@pimia.net
+
+Features implemented:
+- Realtime 3D rendering of a very basic analog clock featuring a clock face with hour and minute hands
+- Time setting from web interface via websockets
+- Querying current time from web interface via websockets
+- Picking and setting colors of clock face and hands from web interface via websockets
+
+Features to be expected:
+- Dynamic progressing of time :)
+- Setting textures to clock from web interface
 
 PLEASE NOTE THAT THIS IS WORK IN PROGRESS SO SOME FEATURES MAY NOT WORK AS EXPECTED!
 
 This application has been developed and tested on Ubuntu Linux 14.04 using GCC 4.9.2 as compiler and Qt Creator 3.0.1 as IDE.
-
-Author: juha@pimia.net
 
 Components/applications/tools used:
 - OGRE: A free, open source 3D rendering library/framework, http://www.ogre3d.org
 - Blender: A free 3D modeling software, http://www.blender.org
 - libwebsockets: A free websockets library written in C, https://libwebsockets.org
 - jQuery: A free javascript framework, http://jquery.com
-- ColorPicker: A free javascript-based color picker tool, http://www.dematte.at/tinyColorPicker
+- ColorPicker: A free javascript-based color picker tool, http://www.dematte.at/tinyColorPicke

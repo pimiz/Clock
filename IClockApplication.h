@@ -1,3 +1,8 @@
+/* IClockApplication.h - header for IClockApplication
+ * --------------------------------------------------
+ * An interface class to allow instantiating and running
+ * the clock application. */
+
 #ifndef ICLOCKAPPLICATION_H
 #define ICLOCKAPPLICATION_H
 

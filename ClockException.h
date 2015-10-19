@@ -1,3 +1,10 @@
+/* ClockException.h - header for ClockException
+ * --------------------------------------------
+ * ClockException is a custom exception class
+ * which is derived from standard exception. It is
+ * used to classify if the exceptions occurred
+ * are caused by ClockApplication's own implementation. */
+
 #ifndef CLOCKEXCEPTION_H
 #define CLOCKEXCEPTION_H
 

@@ -7,6 +7,7 @@
 
 namespace Clock
 {
+/* creates and returns an object instance of a given user request */
 UserRequestPtr createUserRequestObject(UserRequestCommand const p_command, RecvBuffer const &p_buffer)
 {
     switch (p_command)

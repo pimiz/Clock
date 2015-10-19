@@ -16,7 +16,6 @@ ClockApplication::ClockApplication() :
     m_currentHours(0),
     m_currentMinutes(0)
 {
-
 #ifdef _DEBUG
 #ifndef OGRE_STATIC_LIB
     mResourcesCfg = m_ResourcePath + "resources_d.cfg";
@@ -34,8 +33,6 @@ ClockApplication::ClockApplication() :
     mPluginsCfg = "plugins.cfg";
 #endif
 #endif
-
-
 }
 
 ClockApplication::~ClockApplication()
@@ -58,6 +55,7 @@ void ClockApplication::go()
     struct tm * now = localtime(&t);
     adjustClock(now->tm_hour, now->tm_min);
 
+    /* set initial colours */
     setClockFaceColour("#FF0000");
     setHourHandColour("#00FF00");
     setMinuteHandColour("#0000FF");

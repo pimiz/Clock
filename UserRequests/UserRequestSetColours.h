@@ -1,3 +1,9 @@
+/* UserRequestSetColours.h - header for UserRequestSetColours
+ * ----------------------------------------------------------
+ * The class for setting colours of the clock. It reads the RGB
+ * values from buffer and sets the colours of clock application
+ * accordingly. */
+
 #ifndef USERREQUESTSETCOLOURS_H
 #define USERREQUESTSETCOLOURS_H
 

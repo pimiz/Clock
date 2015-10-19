@@ -1,3 +1,10 @@
+/* WebsocketInterface.h - header for WebsocketInterface
+ * ----------------------------------------------------
+ * Websockets interface related methods. Websocket interface
+ * is not implemented as a class, because libwebsockets is a
+ * C library and thus it is safer to invoke global functions
+ * instead of static member functions. */
+
 #ifndef WEBSOCKETINTERFACE_H
 #define WEBSOCKETINTERFACE_H
 

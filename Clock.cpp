@@ -1,3 +1,7 @@
+/* Clock.cpp - main application
+ * ------------------------------------------
+ * Starts an instance of ClockApplication. */
+
 #include <iostream>
 #include <memory>
 #include "IClockApplication.h"

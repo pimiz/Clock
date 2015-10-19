@@ -1,3 +1,9 @@
+/* BufferProvider.h - header for BufferProvider
+ * --------------------------------------------
+/* class BufferProvider: A singleton class which provides two
+ * buffers to transfer data between components bidirectionally. */
+
+
 #ifndef BUFFERPROVIDER_H
 #define BUFFERPROVIDER_H
 #include <memory>
@@ -5,9 +11,6 @@
 
 using Clock::RecvBuffer;
 using Clock::SendBuffer;
-
-/* class BufferProvider: A singleton class which provides a
- * buffer to transfer data between components. */
 
 class BufferProvider
 {

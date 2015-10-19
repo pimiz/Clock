@@ -1,3 +1,8 @@
+/* CommonDefines.h - header for common defines
+ * -------------------------------------------
+ * Application-widely used common macros, typedefs
+ * etc are defined here. */
+
 #ifndef COMMONDEFINES_H
 #define COMMONDEFINES_H
 

@@ -1,3 +1,12 @@
+/* IClockAdjuster.h - header for IClockAdjuster
+ * --------------------------------------------
+ * IClockAdjuster is an interface class which
+ * has to be implemented by clock application to
+ * provide functionality for adjusting time and
+ * colours of the clock. A user request object invokes
+ * this interface so the whole implementation of
+ * clock application does not have to be exposed. */
+
 #ifndef ICLOCKADJUSTER_H
 #define ICLOCKADJUSTER_H
 

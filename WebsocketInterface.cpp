@@ -27,11 +27,6 @@ namespace WebsocketInterface {
 int force_exit = 0;
 libwebsocket_context *context;
 
-//**************************************************************************//
-
-   // libwebsocket_context_destroy(context);
-
-
 int init()
 {
     int n = 0;

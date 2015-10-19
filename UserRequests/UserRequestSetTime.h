@@ -1,3 +1,9 @@
+/* UserRequestSetTime.h - header for UserRequestSetTime
+ * ----------------------------------------------------------
+ * The class for setting the time of the clock. It reads the time
+ * values from buffer and sets the time of clock application
+ * accordingly. */
+
 #ifndef USERREQUESTSETTIME_H
 #define USERREQUESTSETTIME_H
 
@@ -6,7 +12,6 @@
 namespace Clock
 {
 
-/* user request for setting time to clock */
 class UserRequestSetTime : public UserRequest
 {
 public:
