@@ -8,7 +8,6 @@
 #include "ClockApplication.h"
 #include "WebsocketInterface.h"
 #include "ClockException.h"
-#include "UserRequests/UserRequests.h"
 
 namespace Clock {
 
